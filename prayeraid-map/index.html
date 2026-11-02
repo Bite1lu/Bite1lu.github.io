@@ -12,8 +12,11 @@
 
 <title>PrayerAid Map</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Figtree:wght@400;500;600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap">
+<style>
+@font-face{font-family:"Sora";src:url(fonts/sora.woff2) format("woff2");font-weight:100 800;font-display:swap}
+@font-face{font-family:"Figtree";src:url(fonts/figtree.woff2) format("woff2");font-weight:300 900;font-display:swap}
+@font-face{font-family:"Noto Kufi Arabic";src:url(fonts/kufi-arabic.woff2) format("woff2");font-weight:100 900;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+0870-08FF,U+FB50-FDFF,U+FE70-FEFF}
+</style>
 <style>
 /* required styles */
 
@@ -796,6 +799,22 @@ button{cursor:pointer}
 [dir="rtl"] .prefbox h2{font-family:"Noto Kufi Arabic",var(--display)}
 .prefbox p{margin:0 0 6px;color:var(--ink-2);font-size:14px}
 .chip.pref{border-style:dashed}
+.savedrow{display:flex;flex-direction:column;gap:6px;padding-bottom:4px}
+.savedrow h3{color:var(--accent)}
+.mini{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px;text-align:start;width:100%}
+.mini .mdot{width:10px;height:10px;border-radius:50%;flex:none}
+.mini .mn{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .md{flex:none;font-size:13px;color:var(--ink-2)}
+.tag.stale{background:var(--accent-soft);color:var(--warn)}
+.access{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.access .ai{font-size:26px;line-height:1}
+.access .on-h{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+[dir="rtl"] .access .on-h{letter-spacing:0}
+.btn.heart{flex:0 0 auto}
+.btn.heart.on{color:var(--bad);border-color:var(--bad)}
+.askback{position:absolute;z-index:700;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));top:calc(112px + env(safe-area-inset-top,0px));background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px;max-width:520px;margin-inline:auto}
+.askback p{margin:0;font-weight:600}
+.askback .row{display:flex;flex-wrap:wrap;gap:8px}
 .locbanner{display:flex;align-items:center;gap:10px;margin:0 max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:13.5px;line-height:1.4}
 .locbanner span{flex:1;min-width:0}
 .locbanner svg{flex:none;color:#2f6fdf}
@@ -940,7 +959,7 @@ textarea.inp{min-height:90px;resize:vertical}
   <div class="toast" id="toast" role="status"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="leaflet.js"></script>
 <script>
 const TILES = {};
 const OSM_MOSQUES = [{"id": "n2056803076", "lat": 49.59684, "lon": 6.13479, "name": "Le Juste Milieu", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n3030417250", "lat": 49.52259, "lon": 5.88644, "name": "Mosquée Afnane Differdange", "street": "Rue John F. Kennedy", "num": "41", "city": "Differdange", "pc": "4599", "web": null, "phone": null, "oh": null}, {"id": "n3192161724", "lat": 49.23024, "lon": 7.00823, "name": "Bosnisches Islamisches Kulturzentrum Saarbrücken", "street": "Arndtstraße", "num": "14-16", "city": "Saarbrücken", "pc": "66121", "web": null, "phone": null, "oh": null}, {"id": "n4510245146", "lat": 49.76571, "lon": 6.64786, "name": "Imam Husain Verein e.V.", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n5173721726", "lat": 49.23517, "lon": 6.97606, "name": "Moschee der DITIB Merkez Camii Saarbrücken", "street": "Goebenstraße", "num": "38", "city": "Saarbrücken", "pc": "66117", "web": "https://www.ditib-saarbruecken.de/", "phone": "+49 681 9273298", "oh": null}, {"id": "n5173736904", "lat": 49.24499, "lon": 6.97034, "name": "Mesxhidul El-Iman", "street": "Lebacher Straße", "num": "66", "city": "Saarbrücken", "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n5670321474", "lat": 49.24485, "lon": 6.97042, "name": "Mesxhidul El-Iman", "street": "Lebacher Straße", "num": "66", "city": "Saarbrücken", "pc": "66113", "web": null, "phone": null, "oh": null}, {"id": "n7442489921", "lat": 49.22574, "lon": 6.01595, "name": "Association Salama", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n7837419495", "lat": 49.3528, "lon": 6.72843, "name": "Muslimische Gemeinde Saarlouis (MGS) e.V.", "street": "Marktstraße", "num": "15", "city": "Dillingen/Saar", "pc": "66763", "web": null, "phone": null, "oh": null}, {"id": "n10053033318", "lat": 49.68725, "lon": 5.79603, "name": "Mosquée d'Arlon", "street": null, "num": null, "city": null, "pc": "6700", "web": null, "phone": null, "oh": null}, {"id": "n10814575653", "lat": 49.12011, "lon": 6.21349, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n11028289797", "lat": 49.87138, "lon": 6.1589, "name": "Centre culturel islamique Nordstadt", "street": null, "num": null, "city": null, "pc": null, "web": "https://ccins.lu/", "phone": null, "oh": "Mo-Su 08:00-17:00"}, {"id": "n12758067486", "lat": 49.12021, "lon": 6.18326, "name": "Mosquée de la Paix", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n13046299948", "lat": 49.27399, "lon": 7.01469, "name": "Omar Ibn Al Khattab Moschee", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n13964958535", "lat": 49.16983, "lon": 6.93976, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w88743210", "lat": 49.34626, "lon": 6.18497, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w88917682", "lat": 49.37062, "lon": 6.15174, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w90387543", "lat": 49.17396, "lon": 6.94116, "name": "Ar-Rahma", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w90390239", "lat": 49.17185, "lon": 6.93312, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w92869083", "lat": 49.2229, "lon": 7.02614, "name": "Bosnisches Kulturzentrum", "street": "Brebacher Landstraße", "num": "16", "city": "Saarbrücken", "pc": "66121", "web": null, "phone": null, "oh": null}, {"id": "w95455290", "lat": 49.1174, "lon": 6.86725, "name": "Mosquée El Hijra", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w99517433", "lat": 49.32876, "lon": 6.13478, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w103142185", "lat": 49.11838, "lon": 6.18912, "name": "Mosquée de Metz CIMG", "street": null, "num": null, "city": null, "pc": null, "web": "https://www.cimgmetz.org/", "phone": null, "oh": null}, {"id": "w111490293", "lat": 50.01171, "lon": 5.72743, "name": "Mosquée Al Imane", "street": "Avenue de l'Indépendance", "num": "100", "city": "Bastogne", "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w113717888", "lat": 49.75005, "lon": 6.62473, "name": "Islamisches Kulturzentrum Trier e.V.", "street": "Luxemburger Straße", "num": "23", "city": "Trier", "pc": "54294", "web": "https://www.islam-trier.de/", "phone": "+49 651 9988947", "oh": null}, {"id": "w119909953", "lat": 49.25112, "lon": 6.85691, "name": null, "street": "Moltkestraße", "num": "12a", "city": "Völklingen", "pc": "66333", "web": null, "phone": null, "oh": null}, {"id": "w141666476", "lat": 49.16587, "lon": 5.86908, "name": "Mosquée de Jarny", "street": "Avenue Jean Jaurès", "num": "42bis", "city": "Jarny", "pc": "54800", "web": null, "phone": null, "oh": null}, {"id": "w191725221", "lat": 49.23742, "lon": 6.9678, "name": "Bilal Moschee", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w206431381", "lat": 49.56985, "lon": 5.53173, "name": "Mosquée de Virton", "street": "Rue Albert Ier", "num": "3", "city": "Virton", "pc": "6760", "web": null, "phone": null, "oh": null}, {"id": "w220085845", "lat": 49.96857, "lon": 6.5242, "name": "Bitburger Moschee", "street": null, "num": null, "city": null, "pc": null, "web": "https://www.bitburger-moschee.de/", "phone": "+49 6561 6989188", "oh": null}, {"id": "w236316502", "lat": 49.24658, "lon": 6.83825, "name": "Selimiye Moschee", "street": "Schaffhauser Straße", "num": "8", "city": "Völklingen", "pc": "66333", "web": null, "phone": "+49 6898 21380", "oh": null}, {"id": "w247486611", "lat": 49.43987, "lon": 6.85757, "name": "Mevlana Camii", "street": "Zerrstraße", "num": "17", "city": "Schmelz", "pc": "66839", "web": null, "phone": null, "oh": null}, {"id": "w304074932", "lat": 49.249, "lon": 6.90464, "name": "IGMG Ulu Camii", "street": "Theodor-Körner-Straße", "num": "4", "city": "Völklingen", "pc": "66333", "web": null, "phone": null, "oh": null}, {"id": "w313786981", "lat": 49.97446, "lon": 6.94661, "name": "Hamd Moschee", "street": "Werkstraße", "num": "12", "city": "Wittlich", "pc": "54516", "web": "https://ahmadiyya.de/gebetsstaette/moscheen/wittlich-wengerohr/", "phone": null, "oh": null}, {"id": "w331802746", "lat": 49.70365, "lon": 6.57952, "name": "Haci Bayram Camii", "street": "Dammstraße", "num": "2", "city": "Konz", "pc": "54329", "web": null, "phone": null, "oh": null}, {"id": "w353811973", "lat": 49.35541, "lon": 6.72509, "name": "DITIB Türkisch-Islamische Gemeinde e. V.", "street": "Gathmannstraße", "num": "10", "city": "Dillingen/Saar", "pc": "66763", "web": null, "phone": null, "oh": null}, {"id": "w354134825", "lat": 49.32979, "lon": 6.74696, "name": "Alsahraa Versammlung e.V.", "street": "Thirionstraße", "num": "40", "city": "Saarlouis", "pc": "66740", "web": null, "phone": null, "oh": null}, {"id": "w362880077", "lat": 49.98319, "lon": 6.89136, "name": "DITIB Eyüp Sultan Camii", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w409039763", "lat": 49.70825, "lon": 6.5876, "name": "Albukhary Moschee", "street": "Brunostraße", "num": "93", "city": "Konz", "pc": "54329", "web": null, "phone": null, "oh": null}, {"id": "w512059915", "lat": 49.24608, "lon": 6.94387, "name": "Islamische Gemeinde Saarland", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w588778289", "lat": 49.17835, "lon": 6.47431, "name": "Mosquée de Boulay", "street": "Rue du Général de Rascas", "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w712453834", "lat": 49.52728, "lon": 5.78051, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w797121568", "lat": 49.62429, "lon": 6.03756, "name": "Centre Culturel Islamique", "street": null, "num": null, "city": null, "pc": null, "web": "https://www.islam.lu/", "phone": null, "oh": null}, {"id": "w812678420", "lat": 49.13097, "lon": 6.76915, "name": "Mosquée Tabligh", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}];
@@ -953,7 +972,11 @@ en:{search:"Search places or towns",add:"Add a place",all:"All",mosque:"Mosques"
  places:n=>`${n} place${n===1?"":"s"}`,inView:"Luxembourg & Greater Region",nearest:"Nearest",rating:"Best rated",recent:"Recently confirmed",
  filters:"Filters",reset:"Reset",show:n=>`Show ${n} place${n===1?"":"s"}`,space:"Prayer space",men:"Men",women:"Women",both:"Both · separate spaces",mixed:"Mixed",
  amenities:"Amenities",wudu:"Wudu (ablution)",mats:"Prayer mats",quiet:"Quiet room",qibla:"Qibla marked",openNow:"Open now",minRating:"Minimum rating",any:"Any",
- confirmed:"Confirmed in the last 30 days",distance:"Distance",useLoc:"Use my location",walk:n=>`${n} min walk`,placesWithin:(n,d)=>`${n} place${n===1?"":"s"} within ${d}`,nothingWithin:(a,b)=>`Nothing within ${a} · showing ${b}`,aroundArea:"Around the area you picked",smart:"Smart",allD:"All",searchArea:"Search this area",bestNearby:"Best nearby",closedOpens:h=>`Closed · opens ${h}`,closed:"Closed",prefTitle:"Which prayer spaces should we show you?",prefSub:"Saved only on this phone. You can change it anytime.",prefMen:"Men’s spaces",prefWomen:"Women’s spaces",prefAll:"Show all",nearestAll:"Nearest places",locateMe:"Locate me",iosTip:"Tired of being asked for your location? In Safari tap aA in the address bar → Website Settings → Location → Allow.",gotIt:"Got it",locBanner:"See places near you",locating:"Finding your location…",locDenied:"Location is blocked. Allow it in your browser settings, or search a town: distances are measured from the map centre.",locUnavail:"Your location is not available right now. Distances are measured from the map centre.",fromYou:"Distances from you",fromCentre:"Distances from the map centre",youAreHere:"You are here",anyDist:"Any",btype:"Business type",ptype:"Public place type",
+ confirmed:"Confirmed in the last 30 days",distance:"Distance",useLoc:"Use my location",accessQ:"How do people get in?",accWalk:"Walk in",accAsk:"Ask staff first",accCode:"Door code or badge",accWalkL:"Walk in, no need to ask",accAskL:"Ask staff first",accCodeL:"Door code or badge needed",accessH:"How to get in",
+saved:"Your saved places",save:"Save",savedT:"Saved",savedToast:"Saved. It will be at the top of your list.",unsavedToast:"Removed from saved places.",
+didPray:n=>`Did you pray at ${n}?`,yesPrayed:"Yes, I prayed",notPossible:"It wasn’t possible",didntGo:"I didn’t go",why:"What happened?",whyClosed:"It was closed",whyNoSpace:"No space / too busy",whyRefused:"They said no",whyNotFound:"Couldn’t find it",thanksFb:"Thanks. This keeps the map honest for everyone.",
+stale:"Not confirmed recently",noLonger:"No longer available",otherProblem:"Something else is wrong",reportQ:"What’s wrong?",
+privacy:"Privacy",privacyFormNote:"Your details are only used to contact you about this place. See the privacy page.",walk:n=>`${n} min walk`,placesWithin:(n,d)=>`${n} place${n===1?"":"s"} within ${d}`,nothingWithin:(a,b)=>`Nothing within ${a} · showing ${b}`,aroundArea:"Around the area you picked",smart:"Smart",allD:"All",searchArea:"Search this area",bestNearby:"Best nearby",closedOpens:h=>`Closed · opens ${h}`,closed:"Closed",prefTitle:"Which prayer spaces should we show you?",prefSub:"Saved only on this phone. You can change it anytime.",prefMen:"Men’s spaces",prefWomen:"Women’s spaces",prefAll:"Show all",nearestAll:"Nearest places",locateMe:"Locate me",iosTip:"Tired of being asked for your location? In Safari tap aA in the address bar → Website Settings → Location → Allow.",gotIt:"Got it",locBanner:"See places near you",locating:"Finding your location…",locDenied:"Location is blocked. Allow it in your browser settings, or search a town: distances are measured from the map centre.",locUnavail:"Your location is not available right now. Distances are measured from the map centre.",fromYou:"Distances from you",fromCentre:"Distances from the map centre",youAreHere:"You are here",anyDist:"Any",btype:"Business type",ptype:"Public place type",
  cafe:"Café",restaurant:"Restaurant",shop:"Shop",warehouse:"Warehouse / workplace",association:"Association",other:"Other",
  park:"Park",hospital:"Hospital",station:"Station / airport",mall:"Shopping centre",university:"University",
  example:"Example",osm:"OpenStreetMap",unreviewed:"Not reviewed yet",lastConf:d=>d===0?"Confirmed today":`Confirmed ${d} day${d===1?"":"s"} ago`,
@@ -980,7 +1003,11 @@ ar:{search:"ابحث عن مكان أو مدينة",add:"أضف مكاناً",al
  places:n=>`${n} ${n===1?"مكان":"أماكن"}`,inView:"لوكسمبورغ والمنطقة الكبرى",nearest:"الأقرب",rating:"الأعلى تقييماً",recent:"المؤكَّد مؤخراً",
  filters:"الفلاتر",reset:"إعادة ضبط",show:n=>`عرض ${n} ${n===1?"مكان":"أماكن"}`,space:"مكان الصلاة",men:"رجال",women:"نساء",both:"الاثنان · أماكن منفصلة",
  amenities:"المرافق",wudu:"مكان للوضوء",mats:"سجاد الصلاة",quiet:"غرفة هادئة",qibla:"اتجاه القبلة محدد",openNow:"مفتوح الآن",minRating:"أقل تقييم",any:"الكل",
- confirmed:"مؤكَّد خلال آخر 30 يوماً",distance:"المسافة",useLoc:"استعمل موقعي",walk:n=>`${n} دقيقة مشياً`,placesWithin:(n,d)=>`${n} ${n===1?"مكان":"أماكن"} في حدود ${d}`,nothingWithin:(a,b)=>`لا شيء في حدود ${a} · نعرض ${b}`,aroundArea:"حول المنطقة التي اخترتها",smart:"تلقائي",allD:"الكل",searchArea:"ابحث في هذه المنطقة",bestNearby:"الأفضل بالقرب منك",closedOpens:h=>`مغلق · يفتح على ${h}`,closed:"مغلق",prefTitle:"أي أماكن صلاة نعرض لك؟",prefSub:"يُحفظ على هذا الهاتف فقط. يمكنك تغييره في أي وقت.",prefMen:"أماكن الرجال",prefWomen:"أماكن النساء",prefAll:"عرض الكل",nearestAll:"أقرب الأماكن",locateMe:"حدد موقعي",iosTip:"هل تزعجك رسالة طلب الموقع في كل مرة؟ في Safari اضغط على aA في شريط العنوان ← إعدادات الموقع الإلكتروني ← الموقع ← السماح.",gotIt:"فهمت",locBanner:"اعرض الأماكن القريبة منك",locating:"جارٍ تحديد موقعك…",locDenied:"الوصول إلى الموقع محظور. فعّله من إعدادات المتصفح، أو ابحث عن مدينة: المسافات تُحسب من وسط الخريطة.",locUnavail:"موقعك غير متاح حالياً. المسافات تُحسب من وسط الخريطة.",fromYou:"المسافات من موقعك",fromCentre:"المسافات من وسط الخريطة",youAreHere:"أنت هنا",anyDist:"أي مسافة",btype:"نوع المحل",ptype:"نوع المكان العام",
+ confirmed:"مؤكَّد خلال آخر 30 يوماً",distance:"المسافة",useLoc:"استعمل موقعي",accessQ:"كيف يدخل الناس؟",accWalk:"الدخول مباشرة",accAsk:"اسأل الموظفين أولاً",accCode:"رمز الباب أو بطاقة",accWalkL:"ادخل مباشرة، لا داعي للسؤال",accAskL:"اسأل الموظفين أولاً",accCodeL:"تحتاج رمز الباب أو بطاقة",accessH:"كيف تدخل",
+saved:"أماكنك المحفوظة",save:"حفظ",savedT:"محفوظ",savedToast:"تم الحفظ. سيظهر في أعلى قائمتك.",unsavedToast:"تمت إزالته من المحفوظات.",
+didPray:n=>`هل صلّيت في ${n}؟`,yesPrayed:"نعم، صلّيت",notPossible:"لم يكن ممكناً",didntGo:"لم أذهب",why:"ماذا حدث؟",whyClosed:"كان مغلقاً",whyNoSpace:"لا مكان / مزدحم",whyRefused:"رفضوا",whyNotFound:"لم أجده",thanksFb:"شكراً. هذا يحافظ على دقة الخريطة للجميع.",
+stale:"لم يتم التأكيد مؤخراً",noLonger:"لم يعد متاحاً",otherProblem:"مشكلة أخرى",reportQ:"ما المشكلة؟",
+privacy:"الخصوصية",privacyFormNote:"معلوماتك تُستعمل فقط للتواصل معك بخصوص هذا المكان. راجع صفحة الخصوصية.",walk:n=>`${n} دقيقة مشياً`,placesWithin:(n,d)=>`${n} ${n===1?"مكان":"أماكن"} في حدود ${d}`,nothingWithin:(a,b)=>`لا شيء في حدود ${a} · نعرض ${b}`,aroundArea:"حول المنطقة التي اخترتها",smart:"تلقائي",allD:"الكل",searchArea:"ابحث في هذه المنطقة",bestNearby:"الأفضل بالقرب منك",closedOpens:h=>`مغلق · يفتح على ${h}`,closed:"مغلق",prefTitle:"أي أماكن صلاة نعرض لك؟",prefSub:"يُحفظ على هذا الهاتف فقط. يمكنك تغييره في أي وقت.",prefMen:"أماكن الرجال",prefWomen:"أماكن النساء",prefAll:"عرض الكل",nearestAll:"أقرب الأماكن",locateMe:"حدد موقعي",iosTip:"هل تزعجك رسالة طلب الموقع في كل مرة؟ في Safari اضغط على aA في شريط العنوان ← إعدادات الموقع الإلكتروني ← الموقع ← السماح.",gotIt:"فهمت",locBanner:"اعرض الأماكن القريبة منك",locating:"جارٍ تحديد موقعك…",locDenied:"الوصول إلى الموقع محظور. فعّله من إعدادات المتصفح، أو ابحث عن مدينة: المسافات تُحسب من وسط الخريطة.",locUnavail:"موقعك غير متاح حالياً. المسافات تُحسب من وسط الخريطة.",fromYou:"المسافات من موقعك",fromCentre:"المسافات من وسط الخريطة",youAreHere:"أنت هنا",anyDist:"أي مسافة",btype:"نوع المحل",ptype:"نوع المكان العام",
  cafe:"مقهى",restaurant:"مطعم",shop:"متجر",warehouse:"مستودع / مكان عمل",association:"جمعية",other:"أخرى",
  park:"حديقة",hospital:"مستشفى",station:"محطة / مطار",mall:"مركز تجاري",university:"جامعة",
  example:"مثال",osm:"OpenStreetMap",unreviewed:"لم يُقيَّم بعد",lastConf:d=>d===0?"تم التأكيد اليوم":`تم التأكيد قبل ${d} ${d===1?"يوم":"أيام"}`,
@@ -1009,28 +1036,28 @@ const T=(k,...a)=>{const v=STR[lang][k];return typeof v==="function"?v(...a):(v?
 const AM=["wudu","mats","quiet","qibla"];
 const today=Date.now(), DAY=864e5;
 const EX=[ // fictional examples
- {id:"e1",kind:"business",type:"cafe",name:"Café Nour",lat:49.6005,lon:6.1340,city:"Luxembourg-Gare",street:"(example) rue de Strasbourg",space:"both",cap:6,note:{en:"Please order something small if you can, the room is ours and we are happy to share it.",ar:"إذا استطعتم، اطلبوا شيئاً بسيطاً. الغرفة لنا ويسعدنا أن نشاركها معكم."},am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Sa 07:00-20:00",open:[7,20],rating:4.8,rc:23,ci:61,conf:1,
+ {id:"e1",kind:"business",type:"cafe",name:"Café Nour",lat:49.6005,lon:6.1340,city:"Luxembourg-Gare",street:"(example) rue de Strasbourg",space:"both",cap:6,access:"ask",note:{en:"Please order something small if you can, the room is ours and we are happy to share it.",ar:"إذا استطعتم، اطلبوا شيئاً بسيطاً. الغرفة لنا ويسعدنا أن نشاركها معكم."},am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Sa 07:00-20:00",open:[7,20],rating:4.8,rc:23,ci:61,conf:1,
   revs:[{n:"Yassine",s:5,d:3,t:{en:"Small room behind the counter, very clean. Owner brings a mat if you ask.",ar:"غرفة صغيرة خلف الكونتوار، نظيفة جداً. صاحب المقهى يجيب سجادة إذا طلبت."},p:2},{n:"Amina",s:5,d:9,t:{en:"Separate corner for sisters upstairs. Quiet in the afternoon.",ar:"ركن منفصل للأخوات في الطابق العلوي. هادئ بعد الظهر."},p:1}]},
- {id:"e2",kind:"business",type:"restaurant",name:"Le Petit Atlas",lat:49.6118,lon:6.1265,city:"Luxembourg-Ville",street:"(example) Grand-Rue",space:"men",cap:4,am:{wudu:true,mats:true,quiet:false,qibla:true},hours:"Tu-Su 11:30-23:00",open:[11.5,23],rating:4.3,rc:11,ci:28,conf:6,
+ {id:"e2",kind:"business",type:"restaurant",name:"Le Petit Atlas",lat:49.6118,lon:6.1265,city:"Luxembourg-Ville",street:"(example) Grand-Rue",space:"men",cap:4,access:"ask",am:{wudu:true,mats:true,quiet:false,qibla:true},hours:"Tu-Su 11:30-23:00",open:[11.5,23],rating:4.3,rc:11,ci:28,conf:6,
   revs:[{n:"Karim",s:4,d:6,t:{en:"Prayer area in the basement storage room. Fine for Dhuhr, busy at night.",ar:"مكان للصلاة في الطابق السفلي. مناسب للظهر، مزدحم في الليل."},p:0}]},
- {id:"e3",kind:"business",type:"warehouse",name:"Atelier Logistique Kayl",lat:49.4870,lon:6.0410,city:"Kayl",street:"(example) zone industrielle",space:"both",cap:10,note:{en:"Drivers welcome Monday to Friday. Ring at gate B and say you are here to pray.",ar:"السائقون مرحب بهم من الإثنين إلى الجمعة. اضغط الجرس عند البوابة B وقل إنك جئت للصلاة."},am:{wudu:true,mats:true,quiet:true,qibla:false},hours:"Mo-Fr 06:00-18:00",open:[6,18],rating:4.6,rc:7,ci:40,conf:2,
+ {id:"e3",kind:"business",type:"warehouse",name:"Atelier Logistique Kayl",lat:49.4870,lon:6.0410,city:"Kayl",street:"(example) zone industrielle",space:"both",cap:10,access:"code",note:{en:"Drivers welcome Monday to Friday. Ring at gate B and say you are here to pray.",ar:"السائقون مرحب بهم من الإثنين إلى الجمعة. اضغط الجرس عند البوابة B وقل إنك جئت للصلاة."},am:{wudu:true,mats:true,quiet:true,qibla:false},hours:"Mo-Fr 06:00-18:00",open:[6,18],rating:4.6,rc:7,ci:40,conf:2,
   revs:[{n:"Bilal",s:5,d:2,t:{en:"They opened their break room to drivers passing by. Ring at gate B.",ar:"يفتحون غرفة الاستراحة للسائقين المارين. اضغط الجرس عند البوابة B."},p:1}]},
- {id:"e4",kind:"business",type:"shop",name:"Épicerie Al Baraka",lat:49.4975,lon:5.9805,city:"Esch-sur-Alzette",street:"(example) rue de l'Alzette",space:"men",cap:2,am:{wudu:false,mats:true,quiet:false,qibla:true},hours:"Mo-Sa 08:00-21:00",open:[8,21],rating:3.9,rc:9,ci:15,conf:18,
+ {id:"e4",kind:"business",type:"shop",name:"Épicerie Al Baraka",lat:49.4975,lon:5.9805,city:"Esch-sur-Alzette",street:"(example) rue de l'Alzette",space:"men",cap:2,access:"ask",am:{wudu:false,mats:true,quiet:false,qibla:true},hours:"Mo-Sa 08:00-21:00",open:[8,21],rating:3.9,rc:9,ci:15,conf:18,
   revs:[{n:"Omar",s:4,d:18,t:{en:"Small space next to the stock room. No wudu, bring your own water.",ar:"مكان صغير بجانب المخزن. لا يوجد مكان للوضوء، أحضر الماء معك."},p:0}]},
- {id:"e5",kind:"business",type:"association",name:"Maison des Cultures Strassen",lat:49.6200,lon:6.0730,city:"Strassen",street:"(example) route d'Arlon",space:"both",cap:40,note:{en:"Jumu'ah at 13:15. Sisters' entrance is on the left side of the building.",ar:"صلاة الجمعة على الساعة 13:15. مدخل الأخوات على الجهة اليسرى من البناية."},am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Su 09:00-22:00",open:[9,22],rating:4.9,rc:31,ci:120,conf:0,
+ {id:"e5",kind:"business",type:"association",name:"Maison des Cultures Strassen",lat:49.6200,lon:6.0730,city:"Strassen",street:"(example) route d'Arlon",space:"both",cap:40,access:"walk",note:{en:"Jumu'ah at 13:15. Sisters' entrance is on the left side of the building.",ar:"صلاة الجمعة على الساعة 13:15. مدخل الأخوات على الجهة اليسرى من البناية."},am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Su 09:00-22:00",open:[9,22],rating:4.9,rc:31,ci:120,conf:0,
   revs:[{n:"Sara",s:5,d:1,t:{en:"Proper prayer room with separate entrance for women. Jumu'ah here too.",ar:"قاعة صلاة حقيقية بمدخل منفصل للنساء. وفيها صلاة الجمعة أيضاً."},p:3}]},
- {id:"e6",kind:"business",type:"cafe",name:"Kirchberg Coffee Lab",lat:49.6290,lon:6.1600,city:"Kirchberg",street:"(example) avenue J.F. Kennedy",space:"both",cap:3,am:{wudu:false,mats:true,quiet:true,qibla:false},hours:"Mo-Fr 07:30-18:00",open:[7.5,18],rating:4.1,rc:5,ci:9,conf:12,
+ {id:"e6",kind:"business",type:"cafe",name:"Kirchberg Coffee Lab",lat:49.6290,lon:6.1600,city:"Kirchberg",street:"(example) avenue J.F. Kennedy",space:"both",cap:3,access:"ask",am:{wudu:false,mats:true,quiet:true,qibla:false},hours:"Mo-Fr 07:30-18:00",open:[7.5,18],rating:4.1,rc:5,ci:9,conf:12,
   revs:[{n:"Lina",s:4,d:12,t:{en:"They let you use the meeting room if it's free. Ask staff.",ar:"يسمحون باستعمال قاعة الاجتماعات إذا كانت فارغة. اسأل الموظفين."},p:0}]},
- {id:"e7",kind:"public",type:"hospital",name:"Multi-faith room (example hospital)",lat:49.6175,lon:6.1050,city:"Luxembourg-Ville",street:"(example) ground floor, near main hall",space:"both",cap:12,am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"24/7",open:[0,24],rating:4.7,rc:14,ci:52,conf:3,
+ {id:"e7",kind:"public",type:"hospital",name:"Multi-faith room (example hospital)",lat:49.6175,lon:6.1050,city:"Luxembourg-Ville",street:"(example) ground floor, near main hall",space:"both",cap:12,access:"walk",am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"24/7",open:[0,24],rating:4.7,rc:14,ci:52,conf:3,
   revs:[{n:"Hamza",s:5,d:3,t:{en:"Open day and night, clean, signs from the main entrance.",ar:"مفتوح ليلاً ونهاراً، نظيف، وعليه لافتات من المدخل الرئيسي."},p:1}]},
- {id:"e8",kind:"public",type:"station",name:"Quiet room (example airport)",lat:49.6265,lon:6.2110,city:"Findel",street:"(example) departures, level 1",space:"both",cap:5,am:{wudu:false,mats:false,quiet:true,qibla:true},hours:"05:00-23:00",open:[5,23],rating:3.6,rc:8,ci:19,conf:25,
+ {id:"e8",kind:"public",type:"station",name:"Quiet room (example airport)",lat:49.6265,lon:6.2110,city:"Findel",street:"(example) departures, level 1",space:"both",cap:5,access:"walk",am:{wudu:false,mats:false,quiet:true,qibla:true},hours:"05:00-23:00",open:[5,23],rating:3.6,rc:8,ci:19,conf:25,
   revs:[{n:"Ilyas",s:3,d:25,t:{en:"Quiet but no mats. Qibla sticker on the wall.",ar:"هادئ لكن بدون سجاد. ملصق القبلة على الحائط."},p:0}]},
- {id:"e9",kind:"public",type:"park",name:"Park bench area (example park)",lat:49.6085,lon:6.1215,city:"Luxembourg-Ville",street:"(example) lawn behind the playground",space:"men",cap:8,am:{wudu:false,mats:false,quiet:true,qibla:false},hours:"Sunrise-sunset",open:[7,19],rating:3.8,rc:4,ci:6,conf:40,revs:[]},
- {id:"e10",kind:"public",type:"university",name:"Student quiet room (example campus)",lat:49.5050,lon:5.9470,city:"Esch-Belval",street:"(example) library, 2nd floor",space:"both",cap:15,am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Fr 08:00-20:00",open:[8,20],rating:4.5,rc:12,ci:44,conf:4,
+ {id:"e9",kind:"public",type:"park",name:"Park bench area (example park)",lat:49.6085,lon:6.1215,city:"Luxembourg-Ville",street:"(example) lawn behind the playground",space:"men",cap:8,access:"walk",am:{wudu:false,mats:false,quiet:true,qibla:false},hours:"Sunrise-sunset",open:[7,19],rating:3.8,rc:4,ci:6,conf:40,revs:[]},
+ {id:"e10",kind:"public",type:"university",name:"Student quiet room (example campus)",lat:49.5050,lon:5.9470,city:"Esch-Belval",street:"(example) library, 2nd floor",space:"both",cap:15,access:"code",am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Fr 08:00-20:00",open:[8,20],rating:4.5,rc:12,ci:44,conf:4,
   revs:[{n:"Nour",s:5,d:4,t:{en:"Students keep it tidy. Badge needed after 18:00.",ar:"الطلبة يحافظون على نظافته. تحتاج بطاقة بعد الساعة 18:00."},p:1}]},
- {id:"e11",kind:"business",type:"restaurant",name:"Saveurs du Maghreb",lat:49.1195,lon:6.1760,city:"Metz",street:"(example) rue Serpenoise",space:"both",cap:6,note:{en:"Prayer room upstairs is open during opening hours. Ask any staff member.",ar:"قاعة الصلاة في الطابق العلوي مفتوحة خلال أوقات العمل. اسأل أي موظف."},am:{wudu:true,mats:true,quiet:false,qibla:true},hours:"Mo-Su 12:00-23:00",open:[12,23],rating:4.4,rc:19,ci:33,conf:5,
+ {id:"e11",kind:"business",type:"restaurant",name:"Saveurs du Maghreb",lat:49.1195,lon:6.1760,city:"Metz",street:"(example) rue Serpenoise",space:"both",cap:6,access:"ask",note:{en:"Prayer room upstairs is open during opening hours. Ask any staff member.",ar:"قاعة الصلاة في الطابق العلوي مفتوحة خلال أوقات العمل. اسأل أي موظف."},am:{wudu:true,mats:true,quiet:false,qibla:true},hours:"Mo-Su 12:00-23:00",open:[12,23],rating:4.4,rc:19,ci:33,conf:5,
   revs:[{n:"Rachid",s:4,d:5,t:{en:"Room upstairs, separate for women. Owner very welcoming.",ar:"قاعة في الطابق العلوي، منفصلة للنساء. صاحب المطعم مرحّب جداً."},p:2}]},
- {id:"e12",kind:"public",type:"mall",name:"Prayer corner (example shopping centre)",lat:49.6880,lon:5.8150,city:"Arlon",street:"(example) near the toilets, level 0",space:"men",cap:3,am:{wudu:true,mats:false,quiet:false,qibla:true},hours:"Mo-Sa 09:00-20:00",open:[9,20],rating:3.2,rc:6,ci:8,conf:50,
+ {id:"e12",kind:"public",type:"mall",name:"Prayer corner (example shopping centre)",lat:49.6880,lon:5.8150,city:"Arlon",street:"(example) near the toilets, level 0",space:"men",cap:3,access:"walk",am:{wudu:true,mats:false,quiet:false,qibla:true},hours:"Mo-Sa 09:00-20:00",open:[9,20],rating:3.2,rc:6,ci:8,conf:120,
   revs:[{n:"Adam",s:3,d:50,t:{en:"Small and busy on Saturdays. Better to go early.",ar:"صغير ومزدحم يوم السبت. الأفضل الذهاب باكراً."},p:0}]},
 ];
 EX.forEach(e=>{e.example=true;e.source="example"});
@@ -1043,6 +1070,18 @@ function origin(){if(USER)return USER;if(typeof map!=="undefined"){const c=map.g
 function isOpen(p){if(!p.open)return null;const d=new Date(),h=d.getHours()+d.getMinutes()/60;return h>=p.open[0]&&h<p.open[1]}
 const nameOf=p=>p.name||(lang==="ar"?"مسجد (بدون اسم على OSM)":"Mosque (unnamed on OSM)");
 
+// ---------- anonymous analytics (GoatCounter: no cookies, no personal data) ----------
+const GC_CODE=""; // e.g. "prayeraid" → https://prayeraid.goatcounter.com
+function track(name){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:"event/"+name,title:name,event:true})}catch(e){}}
+if(GC_CODE&&location.protocol==="https:"){const s=document.createElement("script");s.async=true;s.src="https://gc.zgo.at/count.js";s.dataset.goatcounter=`https://${GC_CODE}.goatcounter.com/count`;document.head.appendChild(s)}
+// ---------- saved places (on this phone only) ----------
+let SAVED=[];try{SAVED=JSON.parse(localStorage.getItem("pa_saved")||"[]")}catch(e){}
+const isSaved=id=>SAVED.includes(id);
+function toggleSave(id){SAVED=isSaved(id)?SAVED.filter(x=>x!==id):[id,...SAVED];try{localStorage.setItem("pa_saved",JSON.stringify(SAVED))}catch(e){}toast(isSaved(id)?T("savedToast"):T("unsavedToast"));track((isSaved(id)?"save/":"unsave/")+id)}
+const ACC_L={walk:"accWalkL",ask:"accAskL",code:"accCodeL"}, ACC_S={walk:"accWalk",ask:"accAsk",code:"accCode"}, ACC_I={walk:"🚶",ask:"🙋",code:"🔑"};
+const isStale=p=>p.kind!=="mosque"&&(p.conf==null||p.conf>90);
+const IS_IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+function dirUrl(p){return IS_IOS?`https://maps.apple.com/?daddr=${p.lat},${p.lon}&dirflg=w`:`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}&travelmode=walking`}
 // ---------- state ----------
 const F0={kind:"all",mosques:false,space:[],am:[],openNow:false,minR:0,conf:false,btype:[],ptype:[]};
 let pmT, RAD="auto", CENTER=null, RINFO={used:1,auto:true,widened:false}, progMove=false;
@@ -1112,10 +1151,12 @@ function cardHTML(p,best){
   if(p.example)tags.push(`<span class="tag ex">${T("example")}</span>`);
   if(p.source==="osm")tags.push(`<span class="tag osm">${T("unreviewed")}</span>`);
   if(p.space)tags.push(`<span class="tag">${spaceLabel(p.space)}</span>`);
+  if(p.access)tags.push(`<span class="tag">${ACC_I[p.access]} ${T(ACC_S[p.access])}</span>`);
   if(p.cap)tags.push(`<span class="tag">👥 ${T("capN",p.cap)}</span>`);
+  if(isStale(p))tags.push(`<span class="tag stale">${T("stale")}</span>`);
   if(p.conf!=null&&p.conf<=30)tags.push(`<span class="tag fresh">${T("lastConf",p.conf)}</span>`);
   const op=isOpen(p);if(op===false)tags.unshift(`<span class="tag shut">${T("closedOpens",fmtH(p.open[0]))}</span>`);
-  return `<button class="card ${op===false?"closed":""} ${best?"best":""}" data-id="${p.id}">${best?`<span class="bestlbl">${T("bestNearby")}</span>`:""}<span class="thumb" style="background:${COL[p.kind]}">${glyph(p.kind)}</span><span class="t"><span class="name">${esc(nameOf(p))}</span><span class="meta"><span>${kindLabel(p)}</span>·<span class="dist">${distLabel(p)}</span>${p.rc?`·<span class="stars">${stars(p.rating)}</span><span>${p.rating.toFixed(1)} (${p.rc})</span>`:""}</span><span class="meta">${tags.join("")}</span></span></button>`}
+  return `<button class="card ${op===false?"closed":""} ${best?"best":""}" data-id="${p.id}">${best?`<span class="bestlbl">${T("bestNearby")}</span>`:""}<span class="thumb" style="background:${COL[p.kind]}">${glyph(p.kind)}</span><span class="t"><span class="name">${isSaved(p.id)?"♥ ":""}${esc(nameOf(p))}</span><span class="meta"><span>${kindLabel(p)}</span>·<span class="dist">${distLabel(p)}</span>${p.rc?`·<span class="stars">${stars(p.rating)}</span><span>${p.rating.toFixed(1)} (${p.rc})</span>`:""}</span><span class="meta">${tags.join("")}</span></span></button>`}
 function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function render(){
   document.documentElement.lang=lang;
@@ -1132,7 +1173,9 @@ function render(){
   drawRadius(u);if($("#locBannerText"))$("#locBannerText").textContent=T(typeof locMsg!=="undefined"?locMsg:"locBanner");
   const bi=sort==="nearest"?r.findIndex(p=>p.kind!=="mosque"&&isOpen(p)!==false&&(!p.rc||p.rating>=4)):-1;
   const list=bi>=0?[r[bi],...r.filter((_,i)=>i!==bi)]:r;
-  $("#list").innerHTML=`<div class="demo-ribbon">${T("demoBanner")}</div>`+(r.length?list.map((p,i)=>cardHTML(p,bi>=0&&i===0)).join(""):`<div class="empty">${T("noRes")}<br><br><button class="btn sm" id="clearF">${T("clear")}</button></div>`);
+  const sv=SAVED.map(id=>PLACES.find(x=>x.id===id)).filter(Boolean);
+  const savedHTML=sv.length?`<div class="savedrow"><h3>♥ ${T("saved")}</h3>${sv.map(p=>`<button class="mini" data-id="${p.id}"><span class="mdot" style="background:${COL[p.kind]}"></span><span class="mn">${esc(nameOf(p))}</span><span class="md">${isOpen(p)===false?`<span style="color:var(--bad)">${T("closed")}</span>`:distLabel(p)}</span></button>`).join("")}</div>`:"";
+  $("#list").innerHTML=savedHTML+`<div class="demo-ribbon">${T("demoBanner")}</div>`+(r.length?list.map((p,i)=>cardHTML(p,bi>=0&&i===0)).join(""):`<div class="empty">${T("noRes")}<br><br><button class="btn sm" id="clearF">${T("clear")}</button></div>`);
   drawMarkers(r); renderFilters(); $("#applyF").textContent=T("show",r.length);
 }
 function optGroup(title,key,vals,multi=true){return `<section><h3>${title}</h3><div class="opts">${vals.map(([v,l])=>{const on=multi?F[key].includes(v):F[key]===v;return `<button class="opt" data-f="${key}" data-v="${v}" data-m="${multi}" aria-pressed="${on}">${l}</button>`}).join("")}</div></section>`}
@@ -1155,17 +1198,19 @@ function openDetail(id){
   const revs=[...(localRevs[id]||[]),...p.revs];
   const ci=p.ci+(localCi[id]||0);
   const amen=AM.map(a=>{const v=p.am[a];const cls=v===true?"":v===false?"no":"unk";return `<div class="am ${cls}">${v===true?"✓":v===false?"✕":"?"} ${T(a)}</div>`}).join("");
-  const gmaps=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}`;
+  const gmaps=dirUrl(p);
   $("#detailBody").innerHTML=`
    <section><div class="hero" style="background:${COL[p.kind]}">${glyph(p.kind)}<span class="ph">${p.example?"📷 3":"📷 0"}</span></div></section>
    <section>
      <div class="meta">${p.example?`<span class="tag ex">${T("example")}</span>`:""}${p.source==="osm"?`<span class="tag osm">${T("osm")}</span>`:""}<span>${kindLabel(p)}</span>${p.city?`· <span>${esc(p.city)}</span>`:""}· <span>${p.km.toFixed(1)} km</span></div>
      <h1 class="dname">${esc(nameOf(p))}</h1>
      ${p.space?`<div class="meta"><span class="tag">${spaceLabel(p.space)}</span>${p.cap?`<span class="tag">👥 ${T("capN",p.cap)}</span>`:""}${p.conf!=null?`<span class="tag fresh">${T("lastConf",p.conf)}</span>`:""}<span class="tag">${T("checkins",ci)}</span></div>`:""}
+     ${p.access?`<div class="access"><span class="ai">${ACC_I[p.access]}</span><div><div class="on-h">${T("accessH")}</div><b>${T(ACC_L[p.access])}</b></div></div>`:""}
+     ${isStale(p)?`<div class="notice">${T("stale")} · ${p.conf!=null?T("lastConf",p.conf):""}</div>`:""}
      ${p.note?`<div class="ownernote"><div class="on-h">${T("ownerNote")}</div><p>${esc(p.note[lang]||p.note.en)}</p></div>`:""}
      <div class="notice ${p.example?"":"blue"}">${p.example?T("exNote"):T("osmNote")}</div>
    </section>
-   <section style="flex-direction:row;flex-wrap:wrap"><a class="btn primary" style="flex:1 1 160px" href="${gmaps}" target="_blank" rel="noopener">${T("directions")}</a><button class="btn dark" style="flex:1 1 160px" id="ciBtn">${T("prayed")}</button></section>
+   <section style="flex-direction:row;flex-wrap:wrap"><a class="btn primary" style="flex:1 1 160px" href="${gmaps}" target="_blank" rel="noopener" id="dirBtn">${T("directions")}</a><button class="btn dark" style="flex:1 1 120px" id="ciBtn">${T("prayed")}</button><button class="btn heart ${isSaved(id)?"on":""}" id="saveBtn" aria-pressed="${isSaved(id)}">${isSaved(id)?"♥ "+T("savedT"):"♡ "+T("save")}</button></section>
    <section><h3>${T("amenities")}</h3><div class="amen">${amen}</div></section>
    <section><dl class="kv"><dt>${T("address")}</dt><dd>${esc(p.street)||T("unknown")}${p.city?`, ${esc(p.city)}`:""}</dd><dt>${T("hours")}</dt><dd>${esc(p.hours)||T("unknown")}${isOpen(p)===true?` · <b style="color:var(--ok)">${T("openNow")}</b>`:""}</dd>${p.phone?`<dt>${T("phone")}</dt><dd>${esc(p.phone)}</dd>`:""}${p.web?`<dt>${T("website")}</dt><dd><a href="${esc(p.web)}" target="_blank" rel="noopener" style="color:var(--accent)">${esc(p.web)}</a></dd>`:""}</dl></section>
    <section><h3>${T("reviews")}</h3>
@@ -1173,10 +1218,14 @@ function openDetail(id){
      ${revs.map(r=>`<div class="rv"><div class="who"><b style="color:var(--ink)">${esc(r.n)}</b><span class="stars">${stars(r.s)}</span></div><p>${esc(typeof r.t==="string"?r.t:r.t[lang])}</p>${r.p?`<div class="pics">${"<span>📷</span>".repeat(r.p)}</div>`:""}</div>`).join("")}
      <button class="btn" id="revBtn">${T("review")}</button>
    </section>
-   <section style="flex-direction:row;flex-wrap:wrap;gap:8px">${p.kind!=="mosque"?`<button class="btn sm" id="claimBtn">${T("claim")}</button>`:""}<button class="btn sm" id="repBtn">${T("report")}</button></section>`;
-  $("#ciBtn").onclick=()=>{localCi[id]=(localCi[id]||0)+1;p.conf=0;toast(T("prayedDone"));openDetail(id);render()};
+   <section style="flex-direction:row;flex-wrap:wrap;gap:8px">${p.kind!=="mosque"?`<button class="btn sm" id="claimBtn">${T("claim")}</button>`:""}<button class="btn sm" id="repBtn">${T("report")}</button></section>
+   <section id="repBox" hidden><h3>${T("reportQ")}</h3><div class="opts"><button class="opt" data-rep="gone">${T("noLonger")}</button><button class="opt" data-rep="closed">${T("whyClosed")}</button><button class="opt" data-rep="refused">${T("whyRefused")}</button><button class="opt" data-rep="other">${T("otherProblem")}</button></div></section>`;
+  $("#ciBtn").onclick=()=>{localCi[id]=(localCi[id]||0)+1;p.conf=0;track("prayed/yes/"+id);toast(T("prayedDone"));openDetail(id);render()};
+  $("#saveBtn").onclick=()=>{toggleSave(id);openDetail(id);render()};
+  $("#dirBtn").onclick=()=>{track("directions/"+id);try{localStorage.setItem("pa_pending",JSON.stringify({id,ts:Date.now()}))}catch(e){}};
   $("#revBtn").onclick=()=>openReview(p);
-  $("#repBtn").onclick=()=>toast(T("reportSent"));
+  $("#repBtn").onclick=()=>{$("#repBox").hidden=!$("#repBox").hidden};
+  $("#repBox").onclick=e=>{const b=e.target.closest("[data-rep]");if(!b)return;track("report/"+b.dataset.rep+"/"+id);$("#repBox").hidden=true;toast(T("reportSent"))};
   if($("#claimBtn"))$("#claimBtn").onclick=()=>openAddForm(p,true);
   openPanel("#pDetail");
 }
@@ -1203,6 +1252,7 @@ function openAddForm(p,owner){
     <div class="locrow"><button type="button" class="btn sm dark" id="afLoc"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>${T("useMyLoc")}</button><span class="hint">${T("pinHint")}</span></div>
     <label class="f" for="afAddr">${T("addressLabel")}<input class="inp" id="afAddr" name="address" placeholder="${T("locPh")}"></label></section>
   <section><h3>${T("space")}</h3>${radios("space",[["men",T("men")],["women",T("women")],["both",T("both")]],p?.space)}
+    <h3>${T("accessQ")}</h3>${radios("access",[["walk",ACC_I.walk+" "+T("accWalk")],["ask",ACC_I.ask+" "+T("accAsk")],["code",ACC_I.code+" "+T("accCode")]],p?.access)}
     <label class="f" for="afCap">${T("capLabel")}<input class="inp" id="afCap" name="capacity" type="number" inputmode="numeric" min="1" max="2000" style="max-width:140px"></label></section>
   <section><h3>${T("amenitiesQ")}</h3><div class="opts">${AM.map(a=>`<label class="opt"><input type="checkbox" name="has_${a}" value="yes">${T(a)}</label>`).join("")}</div>
     <label class="f" for="afHours">${T("hours")}<input class="inp" id="afHours" name="opening_hours" placeholder="${T("hoursPh")}"></label></section>
@@ -1215,7 +1265,7 @@ function openAddForm(p,owner){
     <label class="f" for="afYou">${T("yourName")}<input class="inp" id="afYou" name="name" autocomplete="name"></label>
     <label class="f" for="afMail">${T("email")}<input class="inp" id="afMail" name="email" type="email" autocomplete="email" inputmode="email"></label>
     <label class="f" for="afTel">${T("phoneOpt")}<input class="inp" id="afTel" name="phone" type="tel" autocomplete="tel"></label></section>
-  <section><label class="check" for="afOk"><input type="checkbox" id="afOk" name="confirmed_rules" value="yes"><span>${T("confirmBox")}</span></label></section>
+  <section><label class="check" for="afOk"><input type="checkbox" id="afOk" name="confirmed_rules" value="yes"><span>${T("confirmBox")}</span></label><div class="hint">${T("privacyFormNote")} <a href="privacy.html" target="_blank" rel="noopener" style="color:var(--accent)">${T("privacy")}</a></div></section>
   </form>`;
   $("#formFoot").innerHTML=`<button class="btn primary" type="submit" form="addForm" id="afSend">${T("send")}</button>`;
   const f=$("#addForm");
@@ -1240,6 +1290,7 @@ function openAddForm(p,owner){
     need($("#afAddr"),$("#afAddr").value.trim().length>3);
     need(f.querySelector('[name="space"]'),!!f.space.value);
     need($("#afCap"),+$("#afCap").value>0);
+    need(f.querySelector('[name="access"]'),!!f.access.value);
     need($("#afYou"),$("#afYou").value.trim().length>1);
     need($("#afMail"),/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($("#afMail").value.trim()));
     need($("#afOk").closest(".check"),$("#afOk").checked);
@@ -1321,7 +1372,7 @@ let tt;function toast(m,ms=2600){const t=$("#toast");t.textContent=m;t.classList
 document.addEventListener("click",e=>{
   const c=e.target.closest("[data-close]"); if(c){closePanels();return}
   const k=e.target.closest("[data-kind]"); if(k){F.kind=k.dataset.kind;render();return}
-  const card=e.target.closest(".card"); if(card){openDetail(card.dataset.id);return}
+  const card=e.target.closest(".card,.mini"); if(card){openDetail(card.dataset.id);return}
   const o=e.target.closest("#filterBody .opt"); if(o){const key=o.dataset.f,v=isNaN(+o.dataset.v)?o.dataset.v:+o.dataset.v;
     if(o.dataset.m==="true"){F[key]=F[key].includes(v)?F[key].filter(x=>x!==v):[...F[key],v]} else if(o.dataset.m==="bool"){F[key]=!F[key]} else F[key]=v; render();return}
   if(e.target.closest("#mosqChip")){F.mosques=!F.mosques;render();return}
@@ -1386,6 +1437,20 @@ const IOS_SAFARI=/iP(hone|ad|od)/.test(navigator.userAgent)&&!navigator.standalo
     if(!shown)setTimeout(showIosTip,4000)}
   if(prefAsked)locate()})();
 function startLocation(){locate()}
+function checkBack(){let pd=null;try{pd=JSON.parse(localStorage.getItem("pa_pending")||"null")}catch(e){}
+  if(!pd)return; const age=Date.now()-pd.ts; if(age<3*60*1000)return;
+  try{localStorage.removeItem("pa_pending")}catch(e){} if(age>18*3600*1000)return;
+  const p=PLACES.find(x=>x.id===pd.id); if(!p||$(".askback"))return;
+  const d=document.createElement("div");d.className="askback";d.setAttribute("role","dialog");
+  d.innerHTML=`<p class="q1">${esc(T("didPray",nameOf(p)))}</p><div class="row"><button class="btn sm primary" data-ab="yes">${T("yesPrayed")}</button><button class="btn sm" data-ab="no">${T("notPossible")}</button><button class="btn sm" data-ab="skip">${T("didntGo")}</button></div>
+   <div class="why" hidden><p class="q2">${T("why")}</p><div class="row"><button class="btn sm" data-why="closed">${T("whyClosed")}</button><button class="btn sm" data-why="nospace">${T("whyNoSpace")}</button><button class="btn sm" data-why="refused">${T("whyRefused")}</button><button class="btn sm" data-why="notfound">${T("whyNotFound")}</button></div></div>`;
+  d.onclick=e=>{const a=e.target.closest("[data-ab]"),w=e.target.closest("[data-why]");
+    if(a){const v=a.dataset.ab;if(v==="no"){d.querySelector(".why").hidden=false;d.querySelector(".row").hidden=true;return}
+      if(v==="yes"){localCi[p.id]=(localCi[p.id]||0)+1;p.conf=0;track("prayed/yes/"+p.id);render();toast(T("thanksFb"))}else track("prayed/skip/"+p.id);d.remove()}
+    if(w){track("prayed/no-"+w.dataset.why+"/"+p.id);toast(T("thanksFb"));d.remove()}};
+  $("#app").appendChild(d)}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")setTimeout(checkBack,600)});
+setTimeout(checkBack,1500);
 function showIosTip(){const d=document.createElement("div");d.className="iostip";d.innerHTML=`<p>${T("iosTip")}</p><button class="btn sm dark">${T("gotIt")}</button>`;
   d.querySelector("button").onclick=()=>{d.remove();try{localStorage.setItem("pa_iostip","1")}catch(e){}};$("#app").appendChild(d)}
 // Add button: long menu kept simple — first tap suggests a place; extra entry points below the list
@@ -1414,7 +1479,7 @@ let pull=null;$("#list").addEventListener("touchstart",e=>{pull=$("#list").scrol
 $("#list").addEventListener("touchend",e=>{if(pull!=null&&e.changedTouches[0].clientY-pull>70)setSheet(sheetState==="full"?"half":"min");pull=null},{passive:true});
 if(location.hash==="#sent"){try{history.replaceState(null,"",location.pathname)}catch(e){}setTimeout(()=>toast(T("sentOk"),5000),700)}
 // extra links at end of list
-const _render=render; render=function(){_render();$("#list").insertAdjacentHTML("beforeend",`<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:6px"><button class="btn sm" id="bizLink">${T("forBiz")}</button><button class="btn sm" id="adminLink">${T("admin")}</button></div>`);$("#bizLink").onclick=()=>openAddForm(null,true);$("#adminLink").onclick=openAdmin;placeFab()};
+const _render=render; render=function(){_render();$("#list").insertAdjacentHTML("beforeend",`<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:6px"><button class="btn sm" id="bizLink">${T("forBiz")}</button><button class="btn sm" id="adminLink">${T("admin")}</button><a class="btn sm" href="privacy.html" target="_blank" rel="noopener">${T("privacy")}</a></div>`);$("#bizLink").onclick=()=>openAddForm(null,true);$("#adminLink").onclick=openAdmin;placeFab()};
 render();
 setSheet("min",false);
 </script>
