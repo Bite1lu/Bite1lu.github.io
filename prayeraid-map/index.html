@@ -748,6 +748,9 @@ button{cursor:pointer}
 
 /* floating */
 .fab{position:absolute;z-index:500;right:max(12px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+.locpill{height:44px;border-radius:999px;border:0;background:var(--surface);color:#2f6fdf;font-weight:600;padding:0 16px 0 12px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow);align-self:flex-end}
+.locpill.on{background:#2f6fdf;color:#fff}
+.locpill.busy{animation:pulse 1s infinite}
 .addbtn{height:48px;border-radius:999px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:0 18px 0 14px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow)}
 
 /* sheet */
@@ -773,6 +776,8 @@ button{cursor:pointer}
 .tag.osm{background:transparent;border:1px dashed var(--line)}
 .tag.fresh{color:var(--ok)}
 .stars{color:var(--accent);letter-spacing:1px;font-variant-numeric:tabular-nums}
+.iostip{position:absolute;z-index:900;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));top:calc(110px + env(safe-area-inset-top,0px));background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;display:flex;gap:12px;align-items:center;font-size:14px;line-height:1.45}
+.iostip p{margin:0;flex:1;min-width:0}
 .locbanner{display:flex;align-items:center;gap:10px;margin:0 max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:13.5px;line-height:1.4}
 .locbanner span{flex:1;min-width:0}
 .locbanner svg{flex:none;color:#2f6fdf}
@@ -876,7 +881,7 @@ textarea.inp{min-height:90px;resize:vertical}
   </div>
 
   <div class="fab" id="fab">
-    <button class="iconbtn" id="locBtn" aria-label="My location"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+    <button class="locpill" id="locBtn"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.6 20 3.8c.4-.2.8.2.6.6l-6.8 16.5c-.2.5-.9.4-1-.1l-1.7-6.4a.6.6 0 0 0-.4-.4L4.3 12c-.5-.1-.6-.8-.1-1z" fill="currentColor"/></svg><span data-t="locateMe"></span></button>
     <button class="addbtn" id="addBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg><span data-t="add"></span></button>
   </div>
 
@@ -926,7 +931,7 @@ en:{search:"Search places or towns",add:"Add a place",all:"All",mosque:"Mosques"
  places:n=>`${n} place${n===1?"":"s"}`,inView:"Luxembourg & Greater Region",nearest:"Nearest",rating:"Best rated",recent:"Recently confirmed",
  filters:"Filters",reset:"Reset",show:n=>`Show ${n} place${n===1?"":"s"}`,space:"Prayer space",men:"Men",women:"Women",both:"Both · separate spaces",mixed:"Mixed",
  amenities:"Amenities",wudu:"Wudu (ablution)",mats:"Prayer mats",quiet:"Quiet room",qibla:"Qibla marked",openNow:"Open now",minRating:"Minimum rating",any:"Any",
- confirmed:"Confirmed in the last 30 days",distance:"Distance",useLoc:"Use my location",locBanner:"See places near you",locating:"Finding your location…",locDenied:"Location is blocked. Allow it in your browser settings, or search a town: distances are measured from the map centre.",locUnavail:"Your location is not available right now. Distances are measured from the map centre.",fromYou:"Distances from you",fromCentre:"Distances from the map centre",youAreHere:"You are here",anyDist:"Any",btype:"Business type",ptype:"Public place type",
+ confirmed:"Confirmed in the last 30 days",distance:"Distance",useLoc:"Use my location",locateMe:"Locate me",iosTip:"Tired of being asked for your location? In Safari tap aA in the address bar → Website Settings → Location → Allow.",gotIt:"Got it",locBanner:"See places near you",locating:"Finding your location…",locDenied:"Location is blocked. Allow it in your browser settings, or search a town: distances are measured from the map centre.",locUnavail:"Your location is not available right now. Distances are measured from the map centre.",fromYou:"Distances from you",fromCentre:"Distances from the map centre",youAreHere:"You are here",anyDist:"Any",btype:"Business type",ptype:"Public place type",
  cafe:"Café",restaurant:"Restaurant",shop:"Shop",warehouse:"Warehouse / workplace",association:"Association",other:"Other",
  park:"Park",hospital:"Hospital",station:"Station / airport",mall:"Shopping centre",university:"University",
  example:"Example",osm:"OpenStreetMap",unreviewed:"Not reviewed yet",lastConf:d=>d===0?"Confirmed today":`Confirmed ${d} day${d===1?"":"s"} ago`,
@@ -953,7 +958,7 @@ ar:{search:"ابحث عن مكان أو مدينة",add:"أضف مكاناً",al
  places:n=>`${n} ${n===1?"مكان":"أماكن"}`,inView:"لوكسمبورغ والمنطقة الكبرى",nearest:"الأقرب",rating:"الأعلى تقييماً",recent:"المؤكَّد مؤخراً",
  filters:"الفلاتر",reset:"إعادة ضبط",show:n=>`عرض ${n} ${n===1?"مكان":"أماكن"}`,space:"مكان الصلاة",men:"رجال",women:"نساء",both:"الاثنان · أماكن منفصلة",
  amenities:"المرافق",wudu:"مكان للوضوء",mats:"سجاد الصلاة",quiet:"غرفة هادئة",qibla:"اتجاه القبلة محدد",openNow:"مفتوح الآن",minRating:"أقل تقييم",any:"الكل",
- confirmed:"مؤكَّد خلال آخر 30 يوماً",distance:"المسافة",useLoc:"استعمل موقعي",locBanner:"اعرض الأماكن القريبة منك",locating:"جارٍ تحديد موقعك…",locDenied:"الوصول إلى الموقع محظور. فعّله من إعدادات المتصفح، أو ابحث عن مدينة: المسافات تُحسب من وسط الخريطة.",locUnavail:"موقعك غير متاح حالياً. المسافات تُحسب من وسط الخريطة.",fromYou:"المسافات من موقعك",fromCentre:"المسافات من وسط الخريطة",youAreHere:"أنت هنا",anyDist:"أي مسافة",btype:"نوع المحل",ptype:"نوع المكان العام",
+ confirmed:"مؤكَّد خلال آخر 30 يوماً",distance:"المسافة",useLoc:"استعمل موقعي",locateMe:"حدد موقعي",iosTip:"هل تزعجك رسالة طلب الموقع في كل مرة؟ في Safari اضغط على aA في شريط العنوان ← إعدادات الموقع الإلكتروني ← الموقع ← السماح.",gotIt:"فهمت",locBanner:"اعرض الأماكن القريبة منك",locating:"جارٍ تحديد موقعك…",locDenied:"الوصول إلى الموقع محظور. فعّله من إعدادات المتصفح، أو ابحث عن مدينة: المسافات تُحسب من وسط الخريطة.",locUnavail:"موقعك غير متاح حالياً. المسافات تُحسب من وسط الخريطة.",fromYou:"المسافات من موقعك",fromCentre:"المسافات من وسط الخريطة",youAreHere:"أنت هنا",anyDist:"أي مسافة",btype:"نوع المحل",ptype:"نوع المكان العام",
  cafe:"مقهى",restaurant:"مطعم",shop:"متجر",warehouse:"مستودع / مكان عمل",association:"جمعية",other:"أخرى",
  park:"حديقة",hospital:"مستشفى",station:"محطة / مطار",mall:"مركز تجاري",university:"جامعة",
  example:"مثال",osm:"OpenStreetMap",unreviewed:"لم يُقيَّم بعد",lastConf:d=>d===0?"تم التأكيد اليوم":`تم التأكيد قبل ${d} ${d===1?"يوم":"أيام"}`,
@@ -1287,7 +1292,8 @@ function showYou(){const ll=L.latLng(USER[0],USER[1]);
   if(!youMarker){accCircle=L.circle(ll,{radius:USER_ACC,color:"#2f6fdf",weight:1,fillColor:"#2f6fdf",fillOpacity:.12,interactive:false}).addTo(map);
     youMarker=L.circleMarker(ll,{radius:8,color:"#fff",weight:3,fillColor:"#2f6fdf",fillOpacity:1}).addTo(map).bindTooltip(T("youAreHere"))}
   else{youMarker.setLatLng(ll);accCircle.setLatLng(ll).setRadius(USER_ACC)}}
-function onPos(pos,first){USER=[pos.coords.latitude,pos.coords.longitude];USER_ACC=pos.coords.accuracy||0;showYou();
+function onPos(pos,first){USER=[pos.coords.latitude,pos.coords.longitude];USER_ACC=pos.coords.accuracy||0;showYou();$("#locBtn").classList.add("on");
+  try{localStorage.setItem("pa_lastpos",JSON.stringify(USER));localStorage.setItem("pa_granted","1")}catch(e){}
   if(first)map.setView(USER,13);$("#locBanner").hidden=true;render()}
 function onPosErr(err){locBusy=false;$("#locBtn").classList.remove("busy");
   if(USER)return; // keep last known position
@@ -1303,10 +1309,20 @@ function locate(){
 $("#locBtn").onclick=locate;
 $("#locGo").onclick=locate;
 map.on("moveend",()=>{if(!USER)render()});
-// On load: if permission was already granted, locate silently; otherwise offer the button (the browser prompt appears on tap).
-(async()=>{try{if(navigator.permissions&&navigator.permissions.query){const st=await navigator.permissions.query({name:"geolocation"});
-   if(st.state==="granted"){locate();return} if(st.state==="denied"){onPosErr({code:1});return}}}catch(e){}
-  locMsg="locBanner";$("#locBanner").hidden=false;$("#locBannerText").textContent=T(locMsg);$("#locGo").hidden=false})();
+// On load: start where the user was last time, then ask for the real position straight away
+// (the browser only shows its prompt if permission isn't already granted; if it was denied we just show the banner).
+try{const lp=JSON.parse(localStorage.getItem("pa_lastpos")||"null");if(lp)map.setView(lp,13)}catch(e){}
+const IOS_SAFARI=/iP(hone|ad|od)/.test(navigator.userAgent)&&!navigator.standalone;
+(async()=>{let state="prompt";
+  try{if(navigator.permissions&&navigator.permissions.query){state=(await navigator.permissions.query({name:"geolocation"})).state}}catch(e){}
+  if(state==="denied"){onPosErr({code:1});return}
+  // iPhone Safari forgets the choice: if we were allowed before and it asks again, show a one-time tip
+  let wasGranted=false;try{wasGranted=localStorage.getItem("pa_granted")==="1"}catch(e){}
+  if(IOS_SAFARI&&wasGranted&&state!=="granted"){let shown=false;try{shown=localStorage.getItem("pa_iostip")==="1"}catch(e){}
+    if(!shown)setTimeout(showIosTip,4000)}
+  locate()})();
+function showIosTip(){const d=document.createElement("div");d.className="iostip";d.innerHTML=`<p>${T("iosTip")}</p><button class="btn sm dark">${T("gotIt")}</button>`;
+  d.querySelector("button").onclick=()=>{d.remove();try{localStorage.setItem("pa_iostip","1")}catch(e){}};$("#app").appendChild(d)}
 // Add button: long menu kept simple — first tap suggests a place; extra entry points below the list
 $("#addBtn").onclick=()=>openAddForm(null,false);
 // ---------- bottom sheet: drag with finger/mouse, 3 snap points ----------
