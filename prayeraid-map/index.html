@@ -778,6 +778,24 @@ button{cursor:pointer}
 .stars{color:var(--accent);letter-spacing:1px;font-variant-numeric:tabular-nums}
 .iostip{position:absolute;z-index:900;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));top:calc(110px + env(safe-area-inset-top,0px));background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;display:flex;gap:12px;align-items:center;font-size:14px;line-height:1.45}
 .iostip p{margin:0;flex:1;min-width:0}
+.rchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0 max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.rchips::-webkit-scrollbar{display:none}
+.rchip{flex:none;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:500;white-space:nowrap}
+.rchip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.card{position:relative}
+.card.closed{opacity:.55}
+.card.best{border:2px solid var(--accent);padding-top:26px}
+.bestlbl{position:absolute;top:7px;inset-inline-start:12px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+[dir="rtl"] .bestlbl{letter-spacing:0}
+.card .dist b{color:var(--ink);font-weight:600}
+.tag.shut{background:var(--surface-2);color:var(--bad)}
+.areabtn{position:absolute;z-index:520;left:50%;transform:translateX(-50%);top:calc(112px + env(safe-area-inset-top,0px));height:40px;border-radius:999px;border:0;background:var(--surface);color:var(--ink);box-shadow:var(--shadow);font-weight:600;padding:0 16px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.prefwrap{position:absolute;inset:0;z-index:950;background:rgba(10,16,28,.55);display:grid;place-items:end center;padding:16px}
+.prefbox{background:var(--surface);border-radius:20px;padding:22px 18px calc(18px + env(safe-area-inset-bottom,0px));width:100%;max-width:460px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
+.prefbox h2{margin:0;font-family:var(--display);font-size:20px;font-weight:600;text-wrap:balance}
+[dir="rtl"] .prefbox h2{font-family:"Noto Kufi Arabic",var(--display)}
+.prefbox p{margin:0 0 6px;color:var(--ink-2);font-size:14px}
+.chip.pref{border-style:dashed}
 .locbanner{display:flex;align-items:center;gap:10px;margin:0 max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:13.5px;line-height:1.4}
 .locbanner span{flex:1;min-width:0}
 .locbanner svg{flex:none;color:#2f6fdf}
@@ -891,6 +909,7 @@ textarea.inp{min-height:90px;resize:vertical}
       <div><h2 id="countTitle"></h2><div class="sub" id="countSub"></div></div>
       <select class="sortsel" id="sort" aria-label="Sort"></select>
     </div>
+    <div class="rchips" id="radChips"></div>
     <div class="locbanner" id="locBanner" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span id="locBannerText"></span><button class="btn sm primary" id="locGo" data-t="useLoc"></button></div>
     <div class="sheet-body" id="list"></div>
   </div>
@@ -915,6 +934,9 @@ textarea.inp{min-height:90px;resize:vertical}
     <div class="panel-foot" id="formFoot"></div>
   </div>
 
+  <button class="areabtn" id="areaBtn" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span data-t="searchArea"></span></button>
+  <div class="prefwrap" id="prefModal" hidden><div class="prefbox" role="dialog" aria-modal="true" aria-labelledby="prefT"><h2 id="prefT" data-t="prefTitle"></h2><p data-t="prefSub"></p>
+    <button class="btn dark" data-pref="men" data-t="prefMen"></button><button class="btn dark" data-pref="women" data-t="prefWomen"></button><button class="btn" data-pref="all" data-t="prefAll"></button></div></div>
   <div class="toast" id="toast" role="status"></div>
 </div>
 
@@ -931,7 +953,7 @@ en:{search:"Search places or towns",add:"Add a place",all:"All",mosque:"Mosques"
  places:n=>`${n} place${n===1?"":"s"}`,inView:"Luxembourg & Greater Region",nearest:"Nearest",rating:"Best rated",recent:"Recently confirmed",
  filters:"Filters",reset:"Reset",show:n=>`Show ${n} place${n===1?"":"s"}`,space:"Prayer space",men:"Men",women:"Women",both:"Both · separate spaces",mixed:"Mixed",
  amenities:"Amenities",wudu:"Wudu (ablution)",mats:"Prayer mats",quiet:"Quiet room",qibla:"Qibla marked",openNow:"Open now",minRating:"Minimum rating",any:"Any",
- confirmed:"Confirmed in the last 30 days",distance:"Distance",useLoc:"Use my location",locateMe:"Locate me",iosTip:"Tired of being asked for your location? In Safari tap aA in the address bar → Website Settings → Location → Allow.",gotIt:"Got it",locBanner:"See places near you",locating:"Finding your location…",locDenied:"Location is blocked. Allow it in your browser settings, or search a town: distances are measured from the map centre.",locUnavail:"Your location is not available right now. Distances are measured from the map centre.",fromYou:"Distances from you",fromCentre:"Distances from the map centre",youAreHere:"You are here",anyDist:"Any",btype:"Business type",ptype:"Public place type",
+ confirmed:"Confirmed in the last 30 days",distance:"Distance",useLoc:"Use my location",walk:n=>`${n} min walk`,placesWithin:(n,d)=>`${n} place${n===1?"":"s"} within ${d}`,nothingWithin:(a,b)=>`Nothing within ${a} · showing ${b}`,aroundArea:"Around the area you picked",smart:"Smart",allD:"All",searchArea:"Search this area",bestNearby:"Best nearby",closedOpens:h=>`Closed · opens ${h}`,closed:"Closed",prefTitle:"Which prayer spaces should we show you?",prefSub:"Saved only on this phone. You can change it anytime.",prefMen:"Men’s spaces",prefWomen:"Women’s spaces",prefAll:"Show all",nearestAll:"Nearest places",locateMe:"Locate me",iosTip:"Tired of being asked for your location? In Safari tap aA in the address bar → Website Settings → Location → Allow.",gotIt:"Got it",locBanner:"See places near you",locating:"Finding your location…",locDenied:"Location is blocked. Allow it in your browser settings, or search a town: distances are measured from the map centre.",locUnavail:"Your location is not available right now. Distances are measured from the map centre.",fromYou:"Distances from you",fromCentre:"Distances from the map centre",youAreHere:"You are here",anyDist:"Any",btype:"Business type",ptype:"Public place type",
  cafe:"Café",restaurant:"Restaurant",shop:"Shop",warehouse:"Warehouse / workplace",association:"Association",other:"Other",
  park:"Park",hospital:"Hospital",station:"Station / airport",mall:"Shopping centre",university:"University",
  example:"Example",osm:"OpenStreetMap",unreviewed:"Not reviewed yet",lastConf:d=>d===0?"Confirmed today":`Confirmed ${d} day${d===1?"":"s"} ago`,
@@ -958,7 +980,7 @@ ar:{search:"ابحث عن مكان أو مدينة",add:"أضف مكاناً",al
  places:n=>`${n} ${n===1?"مكان":"أماكن"}`,inView:"لوكسمبورغ والمنطقة الكبرى",nearest:"الأقرب",rating:"الأعلى تقييماً",recent:"المؤكَّد مؤخراً",
  filters:"الفلاتر",reset:"إعادة ضبط",show:n=>`عرض ${n} ${n===1?"مكان":"أماكن"}`,space:"مكان الصلاة",men:"رجال",women:"نساء",both:"الاثنان · أماكن منفصلة",
  amenities:"المرافق",wudu:"مكان للوضوء",mats:"سجاد الصلاة",quiet:"غرفة هادئة",qibla:"اتجاه القبلة محدد",openNow:"مفتوح الآن",minRating:"أقل تقييم",any:"الكل",
- confirmed:"مؤكَّد خلال آخر 30 يوماً",distance:"المسافة",useLoc:"استعمل موقعي",locateMe:"حدد موقعي",iosTip:"هل تزعجك رسالة طلب الموقع في كل مرة؟ في Safari اضغط على aA في شريط العنوان ← إعدادات الموقع الإلكتروني ← الموقع ← السماح.",gotIt:"فهمت",locBanner:"اعرض الأماكن القريبة منك",locating:"جارٍ تحديد موقعك…",locDenied:"الوصول إلى الموقع محظور. فعّله من إعدادات المتصفح، أو ابحث عن مدينة: المسافات تُحسب من وسط الخريطة.",locUnavail:"موقعك غير متاح حالياً. المسافات تُحسب من وسط الخريطة.",fromYou:"المسافات من موقعك",fromCentre:"المسافات من وسط الخريطة",youAreHere:"أنت هنا",anyDist:"أي مسافة",btype:"نوع المحل",ptype:"نوع المكان العام",
+ confirmed:"مؤكَّد خلال آخر 30 يوماً",distance:"المسافة",useLoc:"استعمل موقعي",walk:n=>`${n} دقيقة مشياً`,placesWithin:(n,d)=>`${n} ${n===1?"مكان":"أماكن"} في حدود ${d}`,nothingWithin:(a,b)=>`لا شيء في حدود ${a} · نعرض ${b}`,aroundArea:"حول المنطقة التي اخترتها",smart:"تلقائي",allD:"الكل",searchArea:"ابحث في هذه المنطقة",bestNearby:"الأفضل بالقرب منك",closedOpens:h=>`مغلق · يفتح على ${h}`,closed:"مغلق",prefTitle:"أي أماكن صلاة نعرض لك؟",prefSub:"يُحفظ على هذا الهاتف فقط. يمكنك تغييره في أي وقت.",prefMen:"أماكن الرجال",prefWomen:"أماكن النساء",prefAll:"عرض الكل",nearestAll:"أقرب الأماكن",locateMe:"حدد موقعي",iosTip:"هل تزعجك رسالة طلب الموقع في كل مرة؟ في Safari اضغط على aA في شريط العنوان ← إعدادات الموقع الإلكتروني ← الموقع ← السماح.",gotIt:"فهمت",locBanner:"اعرض الأماكن القريبة منك",locating:"جارٍ تحديد موقعك…",locDenied:"الوصول إلى الموقع محظور. فعّله من إعدادات المتصفح، أو ابحث عن مدينة: المسافات تُحسب من وسط الخريطة.",locUnavail:"موقعك غير متاح حالياً. المسافات تُحسب من وسط الخريطة.",fromYou:"المسافات من موقعك",fromCentre:"المسافات من وسط الخريطة",youAreHere:"أنت هنا",anyDist:"أي مسافة",btype:"نوع المحل",ptype:"نوع المكان العام",
  cafe:"مقهى",restaurant:"مطعم",shop:"متجر",warehouse:"مستودع / مكان عمل",association:"جمعية",other:"أخرى",
  park:"حديقة",hospital:"مستشفى",station:"محطة / مطار",mall:"مركز تجاري",university:"جامعة",
  example:"مثال",osm:"OpenStreetMap",unreviewed:"لم يُقيَّم بعد",lastConf:d=>d===0?"تم التأكيد اليوم":`تم التأكيد قبل ${d} ${d===1?"يوم":"أيام"}`,
@@ -1022,27 +1044,41 @@ function isOpen(p){if(!p.open)return null;const d=new Date(),h=d.getHours()+d.ge
 const nameOf=p=>p.name||(lang==="ar"?"مسجد (بدون اسم على OSM)":"Mosque (unnamed on OSM)");
 
 // ---------- state ----------
-const F0={kind:"all",mosques:false,space:[],am:[],openNow:false,minR:0,conf:false,dist:0,btype:[],ptype:[]};
+const F0={kind:"all",mosques:false,space:[],am:[],openNow:false,minR:0,conf:false,btype:[],ptype:[]};
+let pmT, RAD="auto", CENTER=null, RINFO={used:1,auto:true,widened:false}, progMove=false;
+const STEPS=[1,3,10,25];
+let SPACE_PREF=null; try{SPACE_PREF=localStorage.getItem("pa_space")}catch(e){}
+const prefSpaces=v=>v==="men"?["men","both"]:v==="women"?["women","both"]:[];
+const fmtD=km=>km===Infinity?T("allD"):km<1?`${Math.round(km*1000)} m`:`${+km.toFixed(km<10?1:0)} km`;
+const walkMin=km=>Math.max(1,Math.round(km*15.6));
+const fmtH=h=>`${String(Math.floor(h)).padStart(2,"0")}:${String(Math.round((h%1)*60)).padStart(2,"0")}`;
+function center(){return CENTER||origin()}
 let F=JSON.parse(JSON.stringify(F0)), sort="nearest", query="", selected=null;
-function activeCount(){return F.space.length+F.am.length+(F.openNow?1:0)+(F.minR?1:0)+(F.conf?1:0)+(F.dist?1:0)+F.btype.length+F.ptype.length}
+function activeCount(){const sp=JSON.stringify(F.space)!==JSON.stringify(prefSpaces(SPACE_PREF))?F.space.length:0;return sp+F.am.length+(F.openNow?1:0)+(F.minR?1:0)+(F.conf?1:0)+F.btype.length+F.ptype.length}
 function filtered(){
   const q=query.trim().toLowerCase();
-  const o=origin(); PLACES.forEach(p=>p.km=dist(o,[p.lat,p.lon]));
+  const o=origin(), c=center(); PLACES.forEach(p=>{p.km=dist(o,[p.lat,p.lon]);p.rkm=dist(c,[p.lat,p.lon])});
   let r=PLACES.filter(p=>{
     if(p.kind==="mosque"){if(!F.mosques)return false}else if(F.kind!=="all"&&p.kind!==F.kind)return false;
     if(q&&!(`${nameOf(p)} ${p.city||""} ${p.street||""}`.toLowerCase().includes(q)))return false;
-    if(F.space.length&&!F.space.includes(p.space))return false;
+    if(F.space.length&&p.kind!=="mosque"&&!F.space.includes(p.space))return false;
     if(F.am.length&&!F.am.every(a=>p.am[a]))return false;
     if(F.openNow&&isOpen(p)!==true)return false;
     if(F.minR&&p.rating<F.minR)return false;
     if(F.conf&&!(p.conf!=null&&p.conf<=30))return false;
-    if(F.dist&&p.km>F.dist)return false;
     if(F.btype.length&&p.kind==="business"&&!F.btype.includes(p.type))return false;
     if(F.ptype.length&&p.kind==="public"&&!F.ptype.includes(p.type))return false;
     return true});
-  if(sort==="nearest")r.sort((a,b)=>a.km-b.km);
-  if(sort==="rating")r.sort((a,b)=>b.rating-a.rating||b.rc-a.rc);
-  if(sort==="recent")r.sort((a,b)=>(a.conf??1e9)-(b.conf??1e9));
+  // radius: smart = 1 km, widen to 3/10/25 km until at least 3 places, else all
+  let used;
+  if(RAD==="auto"){used=Infinity;for(const s of STEPS){if(r.filter(p=>p.rkm<=s).length>=3){used=s;break}}
+    RINFO={used,auto:true,widened:used!==STEPS[0],none1:r.filter(p=>p.rkm<=1).length===0}}
+  else{used=RAD;RINFO={used,auto:false,widened:false}}
+  r=r.filter(p=>p.rkm<=used);
+  const closed=p=>isOpen(p)===false?1:0;
+  if(sort==="nearest")r.sort((a,b)=>closed(a)-closed(b)||a.km-b.km);
+  if(sort==="rating")r.sort((a,b)=>closed(a)-closed(b)||b.rating-a.rating||b.rc-a.rc);
+  if(sort==="recent")r.sort((a,b)=>closed(a)-closed(b)||(a.conf??1e9)-(b.conf??1e9));
   return r;
 }
 
@@ -1070,24 +1106,33 @@ const $=s=>document.querySelector(s);
 function stars(r){const f=Math.round(r);return "★".repeat(f)+"☆".repeat(5-f)}
 function kindLabel(p){return p.kind==="mosque"?T("kMosque"):T(p.type)}
 function spaceLabel(s){return s?T(s):null}
-function cardHTML(p){
+function distLabel(p){return USER&&p.km<=2.5?`<b>${T("walk",walkMin(p.km))}</b> · ${fmtD(p.km)}`:fmtD(p.km)}
+function cardHTML(p,best){
   const tags=[];
   if(p.example)tags.push(`<span class="tag ex">${T("example")}</span>`);
   if(p.source==="osm")tags.push(`<span class="tag osm">${T("unreviewed")}</span>`);
   if(p.space)tags.push(`<span class="tag">${spaceLabel(p.space)}</span>`);
   if(p.cap)tags.push(`<span class="tag">👥 ${T("capN",p.cap)}</span>`);
   if(p.conf!=null&&p.conf<=30)tags.push(`<span class="tag fresh">${T("lastConf",p.conf)}</span>`);
-  return `<button class="card" data-id="${p.id}"><span class="thumb" style="background:${COL[p.kind]}">${glyph(p.kind)}</span><span class="t"><span class="name">${esc(nameOf(p))}</span><span class="meta"><span>${kindLabel(p)}</span>·<span>${p.km.toFixed(1)} km</span>${p.rc?`·<span class="stars">${stars(p.rating)}</span><span>${p.rating.toFixed(1)} (${p.rc})</span>`:""}</span><span class="meta">${tags.join("")}</span></span></button>`}
+  const op=isOpen(p);if(op===false)tags.unshift(`<span class="tag shut">${T("closedOpens",fmtH(p.open[0]))}</span>`);
+  return `<button class="card ${op===false?"closed":""} ${best?"best":""}" data-id="${p.id}">${best?`<span class="bestlbl">${T("bestNearby")}</span>`:""}<span class="thumb" style="background:${COL[p.kind]}">${glyph(p.kind)}</span><span class="t"><span class="name">${esc(nameOf(p))}</span><span class="meta"><span>${kindLabel(p)}</span>·<span class="dist">${distLabel(p)}</span>${p.rc?`·<span class="stars">${stars(p.rating)}</span><span>${p.rating.toFixed(1)} (${p.rc})</span>`:""}</span><span class="meta">${tags.join("")}</span></span></button>`}
 function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function render(){
   document.documentElement.lang=lang;
   document.querySelectorAll("[data-t]").forEach(e=>e.textContent=T(e.dataset.t));
   $("#q").placeholder=T("search"); $("#langBtn").textContent=lang==="en"?"عربي":"EN";document.documentElement.dir=lang==="ar"?"rtl":"ltr";
   $("#kindChips").innerHTML=["all","business","public"].map(k=>`<button class="chip" data-kind="${k}" aria-pressed="${F.kind===k}">${k!=="all"?`<span class="dot" style="background:${COL[k]}"></span>`:""}${T(k)}</button>`).join("")+`<button class="chip" id="mosqChip" aria-pressed="${F.mosques}"><span class="dot" style="background:${COL.mosque}"></span>${T("mosque")}</button>`;
+  $("#kindChips").insertAdjacentHTML("afterbegin",`<button class="chip pref" id="prefChip">👤 ${SPACE_PREF==="men"?T("men"):SPACE_PREF==="women"?T("women"):T("prefAll")}</button>`);
   $("#sort").innerHTML=[["nearest",T("nearest")],["rating",T("rating")],["recent",T("recent")]].map(([v,l])=>`<option value="${v}" ${sort===v?"selected":""}>${l}</option>`).join("");
   const n=activeCount(); $("#fcount").hidden=!n; $("#fcount").textContent=n;
-  const r=filtered(); $("#countTitle").textContent=T("places",r.length); $("#countSub").textContent=USER?T("fromYou"):T("fromCentre");if($("#locBannerText"))$("#locBannerText").textContent=T(typeof locMsg!=="undefined"?locMsg:"locBanner");
-  $("#list").innerHTML=`<div class="demo-ribbon">${T("demoBanner")}</div>`+(r.length?r.map(cardHTML).join(""):`<div class="empty">${T("noRes")}<br><br><button class="btn sm" id="clearF">${T("clear")}</button></div>`);
+  const r=filtered(); const u=RINFO.used;
+  $("#countTitle").textContent=u===Infinity?(r.length?T("nearestAll"):T("places",0)):T("placesWithin",r.length,fmtD(u))+(USER&&!CENTER&&u<=2.5?` · ${T("walk",walkMin(u))}`:"");
+  $("#countSub").textContent=RINFO.auto&&RINFO.none1&&u!==STEPS[0]?T("nothingWithin",fmtD(1),fmtD(u)):CENTER?T("aroundArea"):USER?T("fromYou"):T("fromCentre");
+  $("#radChips").innerHTML=[["auto",T("smart")],[0.5,"500 m"],[1,"1 km"],[3,"3 km"],[10,"10 km"],[Infinity,T("allD")]].map(([v,l])=>`<button class="rchip" data-rad="${v}" aria-pressed="${RAD===v||(RAD==="auto"&&v==="auto")}">${l}${RAD==="auto"&&v===u&&v!=="auto"?" ✓":""}</button>`).join("");
+  drawRadius(u);if($("#locBannerText"))$("#locBannerText").textContent=T(typeof locMsg!=="undefined"?locMsg:"locBanner");
+  const bi=sort==="nearest"?r.findIndex(p=>p.kind!=="mosque"&&isOpen(p)!==false&&(!p.rc||p.rating>=4)):-1;
+  const list=bi>=0?[r[bi],...r.filter((_,i)=>i!==bi)]:r;
+  $("#list").innerHTML=`<div class="demo-ribbon">${T("demoBanner")}</div>`+(r.length?list.map((p,i)=>cardHTML(p,bi>=0&&i===0)).join(""):`<div class="empty">${T("noRes")}<br><br><button class="btn sm" id="clearF">${T("clear")}</button></div>`);
   drawMarkers(r); renderFilters(); $("#applyF").textContent=T("show",r.length);
 }
 function optGroup(title,key,vals,multi=true){return `<section><h3>${title}</h3><div class="opts">${vals.map(([v,l])=>{const on=multi?F[key].includes(v):F[key]===v;return `<button class="opt" data-f="${key}" data-v="${v}" data-m="${multi}" aria-pressed="${on}">${l}</button>`}).join("")}</div></section>`}
@@ -1097,7 +1142,6 @@ function renderFilters(){
    optGroup(T("amenities"),"am",AM.map(a=>[a,T(a)]))+
    `<section><h3>${T("openNow")}</h3><div class="opts"><button class="opt" data-f="openNow" data-v="1" data-m="bool" aria-pressed="${F.openNow}">${T("openNow")}</button><button class="opt" data-f="conf" data-v="1" data-m="bool" aria-pressed="${F.conf}">${T("confirmed")}</button></div></section>`+
    optGroup(T("minRating"),"minR",[[0,T("any")],[3,"3+ ★"],[4,"4+ ★"],[4.5,"4.5+ ★"]],false)+
-   optGroup(T("distance"),"dist",[[0,T("anyDist")],[5,"5 km"],[10,"10 km"],[25,"25 km"],[50,"50 km"]],false)+
    optGroup(T("btype"),"btype",["cafe","restaurant","shop","warehouse","association"].map(v=>[v,T(v)]))+
    optGroup(T("ptype"),"ptype",["park","hospital","station","mall","university"].map(v=>[v,T(v)]));
 }
@@ -1106,7 +1150,7 @@ function renderFilters(){
 let localRevs={}; let localCi={};
 function openDetail(id){
   const p=PLACES.find(x=>x.id===id); if(!p)return; selected=id;
-  map.panTo([p.lat,p.lon]); drawMarkers(filtered());
+  progMove=true;clearTimeout(pmT);pmT=setTimeout(()=>progMove=false,900);map.panTo([p.lat,p.lon]); drawMarkers(filtered());
   $("#dTitle").textContent=nameOf(p);
   const revs=[...(localRevs[id]||[]),...p.revs];
   const ci=p.ci+(localCi[id]||0);
@@ -1281,15 +1325,30 @@ document.addEventListener("click",e=>{
   const o=e.target.closest("#filterBody .opt"); if(o){const key=o.dataset.f,v=isNaN(+o.dataset.v)?o.dataset.v:+o.dataset.v;
     if(o.dataset.m==="true"){F[key]=F[key].includes(v)?F[key].filter(x=>x!==v):[...F[key],v]} else if(o.dataset.m==="bool"){F[key]=!F[key]} else F[key]=v; render();return}
   if(e.target.closest("#mosqChip")){F.mosques=!F.mosques;render();return}
-  if(e.target.closest("#clearF")){F=JSON.parse(JSON.stringify(F0));render();return}
+  const rc=e.target.closest("[data-rad]"); if(rc){const v=rc.dataset.rad;RAD=v==="auto"?"auto":v==="Infinity"?Infinity:+v;render();fitRadius();return}
+  if(e.target.closest("#prefChip")){$("#prefModal").hidden=false;return}
+  const pf=e.target.closest("[data-pref]"); if(pf){setPref(pf.dataset.pref);return}
+  if(e.target.closest("#areaBtn")){const c=map.getCenter();CENTER=[c.lat,c.lng];$("#areaBtn").hidden=true;RAD="auto";render();return}
+  if(e.target.closest("#clearF")){F=JSON.parse(JSON.stringify(F0));F.space=prefSpaces(SPACE_PREF);render();return}
   const single=e.target.closest("[data-bt],[data-br],[data-bs]"); if(single){const attr=["bt","br","bs"].find(a=>single.dataset[a]!=null);single.parentElement.querySelectorAll(`[data-${attr}]`).forEach(b=>b.setAttribute("aria-pressed",b===single));return}
 });
-$("#resetF").onclick=()=>{F=JSON.parse(JSON.stringify(F0));render()};
+$("#resetF").onclick=()=>{F=JSON.parse(JSON.stringify(F0));F.space=prefSpaces(SPACE_PREF);render()};
 $("#filterBtn").onclick=()=>openPanel("#pFilters");
 $("#q").oninput=e=>{query=e.target.value;render()};
 $("#sort").onchange=e=>{sort=e.target.value;render()};
 
 $("#langBtn").onclick=()=>{lang=lang==="en"?"ar":"en";try{localStorage.setItem("pa_lang",lang)}catch(e){};render();if(selected&&$("#pDetail").classList.contains("open"))openDetail(selected)};
+// ---------- radius circle, "search this area", space preference ----------
+let radCircle=null;
+function drawRadius(u){const c=center();if(radCircle){map.removeLayer(radCircle);radCircle=null}
+  if(u!==Infinity&&(USER||CENTER))radCircle=L.circle(c,{radius:u*1000,color:"#2f6fdf",weight:1.5,dashArray:"6 6",fill:true,fillOpacity:.04,interactive:false}).addTo(map)}
+function fitRadius(){const u=RINFO.used;if(u===Infinity)return;progMove=true;clearTimeout(pmT);pmT=setTimeout(()=>progMove=false,900);map.fitBounds(L.latLng(center()).toBounds(u*2000),{paddingBottomRight:[0,120]})}
+map.on("movestart",()=>{});
+map.on("moveend",()=>{if(progMove)return;
+  if(!USER&&!CENTER)return; const c=map.getCenter(),d=dist(center(),[c.lat,c.lng]);
+  const u=RINFO.used===Infinity?2:RINFO.used; $("#areaBtn").hidden=d<Math.max(.3,u*.6)});
+function setPref(v){SPACE_PREF=v;try{localStorage.setItem("pa_space",v)}catch(e){}F.space=prefSpaces(v);$("#prefModal").hidden=true;render();if(!prefAsked){prefAsked=true;startLocation()}}
+let prefAsked=!!SPACE_PREF; F.space=prefSpaces(SPACE_PREF);
 // ---------- real location ----------
 var locMsg="locBanner"; let youMarker=null, accCircle=null, watchId=null, locBusy=false;
 function showYou(){const ll=L.latLng(USER[0],USER[1]);
@@ -1298,13 +1357,13 @@ function showYou(){const ll=L.latLng(USER[0],USER[1]);
   else{youMarker.setLatLng(ll);accCircle.setLatLng(ll).setRadius(USER_ACC)}}
 function onPos(pos,first){USER=[pos.coords.latitude,pos.coords.longitude];USER_TS=Date.now();USER_ACC=pos.coords.accuracy||0;showYou();$("#locBtn").classList.add("on");
   try{localStorage.setItem("pa_lastpos",JSON.stringify(USER));localStorage.setItem("pa_granted","1")}catch(e){}
-  if(first)map.setView(USER,13);$("#locBanner").hidden=true;render()}
+  $("#locBanner").hidden=true;render();if(first&&!CENTER){fitRadius()}}
 function onPosErr(err){locBusy=false;$("#locBtn").classList.remove("busy");
   if(USER)return; // keep last known position
   locMsg=err&&err.code===1?"locDenied":"locUnavail";$("#locBanner").hidden=false;$("#locBannerText").textContent=T(locMsg);$("#locGo").hidden=err&&err.code===1;render()}
 function locate(){
   if(!("geolocation" in navigator)){onPosErr({code:2});return}
-  if(USER){map.setView(USER,Math.max(map.getZoom(),14));}
+  if(USER){CENTER=null;$("#areaBtn").hidden=true;render();fitRadius();}
   if(locBusy)return; locBusy=true; $("#locBtn").classList.add("busy"); if(!USER)toast(T("locating"));
   navigator.geolocation.getCurrentPosition(pos=>{locBusy=false;$("#locBtn").classList.remove("busy");const first=!USER;onPos(pos,first);
       if(watchId==null)watchId=navigator.geolocation.watchPosition(p=>onPos(p,false),()=>{}, {enableHighAccuracy:true,maximumAge:30000});},
@@ -1312,19 +1371,21 @@ function locate(){
 }
 $("#locBtn").onclick=locate;
 $("#locGo").onclick=locate;
-map.on("moveend",()=>{if(!USER)render()});
+map.on("moveend",()=>{if(!USER&&!CENTER)render()});
 // On load: start where the user was last time, then ask for the real position straight away
 // (the browser only shows its prompt if permission isn't already granted; if it was denied we just show the banner).
 try{const lp=JSON.parse(localStorage.getItem("pa_lastpos")||"null");if(lp)map.setView(lp,13)}catch(e){}
 const IOS_SAFARI=/iP(hone|ad|od)/.test(navigator.userAgent)&&!navigator.standalone;
 (async()=>{let state="prompt";
+  if(!prefAsked)$("#prefModal").hidden=false;
   try{if(navigator.permissions&&navigator.permissions.query){state=(await navigator.permissions.query({name:"geolocation"})).state}}catch(e){}
   if(state==="denied"){onPosErr({code:1});return}
   // iPhone Safari forgets the choice: if we were allowed before and it asks again, show a one-time tip
   let wasGranted=false;try{wasGranted=localStorage.getItem("pa_granted")==="1"}catch(e){}
   if(IOS_SAFARI&&wasGranted&&state!=="granted"){let shown=false;try{shown=localStorage.getItem("pa_iostip")==="1"}catch(e){}
     if(!shown)setTimeout(showIosTip,4000)}
-  locate()})();
+  if(prefAsked)locate()})();
+function startLocation(){locate()}
 function showIosTip(){const d=document.createElement("div");d.className="iostip";d.innerHTML=`<p>${T("iosTip")}</p><button class="btn sm dark">${T("gotIt")}</button>`;
   d.querySelector("button").onclick=()=>{d.remove();try{localStorage.setItem("pa_iostip","1")}catch(e){}};$("#app").appendChild(d)}
 // Add button: long menu kept simple — first tap suggests a place; extra entry points below the list
