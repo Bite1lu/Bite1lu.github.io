@@ -1,0 +1,1232 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#16233b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PrayerAid">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;height:100%}body{margin:0}</style>
+</head><body>
+
+<title>PrayerAid Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Figtree:wght@400;500;600&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* required styles */
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+/* Prevents IE11 from highlighting tiles in blue */
+.leaflet-tile::selection {
+	background: transparent;
+}
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+/* hack that prevents hw layers "stretching" when loading new tiles */
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */
+/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	/* Fallback for FF which doesn't support pinch-zoom */
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	behavior: url(#default#VML);
+	display: inline-block;
+	position: absolute;
+	}
+
+
+/* control positioning */
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+/* zoom and fade animations */
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+/* cursors */
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+/* marker & overlays interactivity */
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+
+/* visual tweaks */
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+/* general typography */
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+/* general toolbar styles */
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+/* zoom control */
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+/* layers control */
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	background-image: url(images/layers.png);
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-image: url(images/layers-2x.png);
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+/* Default icon URLs */
+.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
+	background-image: url(images/marker-icon.png);
+	}
+
+
+/* attribution and scale controls */
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+/* popup */
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+/* div icon */
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+/* Tooltip */
+/* Base styles for the element that has a tooltip */
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+/* Directions */
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+/* Printing */
+
+@media print {
+	/* Prevent printers from removing background-images of controls. */
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+
+/* Layout: full-height map app; top bar + chip rail float over the map, sheets slide up from the bottom. */
+:root{
+  --ink:#16233b; --ink-2:#4a5670; --ink-3:#7c869a;
+  --bg:#f3f5f8; --surface:#ffffff; --surface-2:#e9edf3; --line:#d6dce6;
+  --accent:#b9781f; --accent-ink:#ffffff; --accent-soft:#f6ead6;
+  --mosque:#1f5c7a; --business:#b9781f; --public:#4d7a3a;
+  --ok:#2f7a4f; --warn:#a8641a; --bad:#b23b3b;
+  --display:"Sora",ui-sans-serif,system-ui,sans-serif;
+  --body:"Figtree",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:14px; --shadow:0 8px 28px rgba(22,35,59,.16);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ink:#e8ecf4; --ink-2:#b3bccb; --ink-3:#8590a4;
+  --bg:#0f1624; --surface:#18212f; --surface-2:#222d3e; --line:#2e3a4d;
+  --accent:#e0a14a; --accent-ink:#1a1206; --accent-soft:#3a2c17;
+  --mosque:#5fa6c9; --business:#e0a14a; --public:#86b86f;
+  --ok:#5fbf86; --warn:#e0a14a; --bad:#e47a7a; --shadow:0 8px 28px rgba(0,0,0,.45); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ink:#e8ecf4; --ink-2:#b3bccb; --ink-3:#8590a4;
+  --bg:#0f1624; --surface:#18212f; --surface-2:#222d3e; --line:#2e3a4d;
+  --accent:#e0a14a; --accent-ink:#1a1206; --accent-soft:#3a2c17;
+  --mosque:#5fa6c9; --business:#e0a14a; --public:#86b86f;
+  --ok:#5fbf86; --warn:#e0a14a; --bad:#e47a7a; --shadow:0 8px 28px rgba(0,0,0,.45); color-scheme:dark}
+[hidden]{display:none!important}
+html,body{height:100%}
+@media (max-width:520px){.brand{padding:6px}.brand .bt{display:none}}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#app{position:relative;height:100%;display:flex;flex-direction:column}
+#map{position:absolute;inset:0;background:var(--surface-2);direction:ltr}
+[dir="rtl"] body{font-family:"Noto Kufi Arabic",var(--body)}
+[dir="rtl"] .dname,[dir="rtl"] .panel-head h2,[dir="rtl"] .sheet-head h2,[dir="rtl"] .brand{font-family:"Noto Kufi Arabic",var(--display)}
+[dir="rtl"] .back svg{transform:scaleX(-1)}
+[dir="rtl"] h3{letter-spacing:0}
+:root[data-theme="dark"] .leaflet-tile-pane{filter:brightness(.72) contrast(1.05) saturate(.7)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .leaflet-tile-pane{filter:brightness(.72) contrast(1.05) saturate(.7)}}
+.leaflet-container{font-family:var(--body);background:var(--surface-2)}
+.leaflet-control-attribution{font-size:10px;background:color-mix(in srgb,var(--surface) 85%,transparent)!important;color:var(--ink-3)!important}
+.leaflet-control-attribution a{color:var(--ink-2)!important}
+.leaflet-control-zoom{display:none}
+
+/* top */
+.top{position:absolute;z-index:500;left:0;right:0;top:0;padding:10px max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.top>*{pointer-events:auto}
+.bar{display:flex;align-items:center;gap:8px}
+.brand{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:999px;padding:6px 12px 6px 6px;box-shadow:var(--shadow);font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:-.01em;white-space:nowrap}
+.brand .mk{width:28px;height:28px;border-radius:50%;background:var(--ink);display:grid;place-items:center}
+.brand .mk svg{width:16px;height:16px}
+.search{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:999px;padding:0 12px;height:42px;box-shadow:var(--shadow)}
+.search input{border:0;background:transparent;outline:0;flex:1;min-width:0;height:100%}
+.search svg{flex:none;color:var(--ink-3)}
+.iconbtn{flex:none;width:42px;height:42px;border-radius:50%;border:0;background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;position:relative}
+.iconbtn .badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+.lang{flex:none;height:42px;border-radius:999px;border:0;background:var(--surface);box-shadow:var(--shadow);padding:0 12px;font-weight:600;font-size:13px;letter-spacing:.04em}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13.5px;font-weight:500;box-shadow:0 2px 8px rgba(22,35,59,.08);white-space:nowrap}
+.chip .dot{width:9px;height:9px;border-radius:50%}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* markers */
+.pin{width:34px;height:42px;position:relative;filter:drop-shadow(0 3px 4px rgba(0,0,0,.28))}
+.pin svg{width:34px;height:42px;display:block}
+.pin.sel{transform:scale(1.18);transform-origin:50% 100%}
+.pin.unrev svg path.body{opacity:.72}
+
+/* floating */
+.fab{position:absolute;z-index:500;right:max(12px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+.addbtn{height:48px;border-radius:999px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:0 18px 0 14px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow)}
+
+/* sheet */
+.sheet{position:absolute;z-index:600;left:0;right:0;bottom:0;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:0 -6px 30px rgba(22,35,59,.18);display:flex;flex-direction:column;max-height:86%;transition:transform .28s ease;padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet.min{transform:translateY(calc(100% - 92px - env(safe-area-inset-bottom,0px)))}
+.sheet .grab{width:100%;border:0;background:transparent;padding:10px 0 4px;display:grid;place-items:center}
+.sheet .grab span{width:40px;height:4px;border-radius:2px;background:var(--line)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.sheet-head h2{margin:0;font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:-.01em}
+.sheet-head .sub{color:var(--ink-3);font-size:13px}
+.sortsel{border:1px solid var(--line);background:var(--surface);border-radius:999px;height:32px;padding:0 10px;font-size:13px}
+.sheet-body{overflow-y:auto;padding:0 max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px}
+.card{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:10px;width:100%}
+.card:hover{border-color:var(--ink-3)}
+.thumb{width:64px;height:64px;border-radius:10px;display:grid;place-items:center;color:#fff}
+.thumb svg{width:28px;height:28px}
+.card .t{min-width:0;display:flex;flex-direction:column;gap:4px}
+.card .name{font-weight:600;font-size:15px;line-height:1.25}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;color:var(--ink-2);font-size:13px}
+.tag{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:999px;background:var(--surface-2);font-size:12px;font-weight:500;color:var(--ink-2)}
+.tag.ex{background:var(--accent-soft);color:var(--warn)}
+.tag.osm{background:transparent;border:1px dashed var(--line)}
+.tag.fresh{color:var(--ok)}
+.stars{color:var(--accent);letter-spacing:1px;font-variant-numeric:tabular-nums}
+.locbanner{display:flex;align-items:center;gap:10px;margin:0 max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:13.5px;line-height:1.4}
+.locbanner span{flex:1;min-width:0}
+.locbanner svg{flex:none;color:#2f6fdf}
+#locBtn.busy{animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.5}}
+.empty{padding:24px 8px;text-align:center;color:var(--ink-2)}
+
+/* modal panels (detail, filters, forms) */
+.panel{position:absolute;z-index:800;inset:0;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s ease;visibility:hidden}
+.panel.open{transform:none;visibility:visible}
+.panel-head{display:flex;align-items:center;gap:10px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:var(--surface)}
+.panel-head h2{margin:0;font-family:var(--display);font-size:18px;font-weight:600;flex:1;min-width:0;text-wrap:balance}
+.back{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:none}
+.panel-body{flex:1;overflow-y:auto;padding:16px max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
+.panel-body>section{display:flex;flex-direction:column;gap:10px;max-width:640px;width:100%;margin-inline:auto}
+.panel-foot{padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--line);background:var(--surface);display:flex;gap:10px}
+.panel-foot .btn{flex:1}
+h3{margin:0;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.opt[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn{height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.btn.sm{height:36px;font-size:13.5px;border-radius:10px}
+
+.hero{height:180px;border-radius:var(--r);display:grid;place-items:center;color:#fff;position:relative;overflow:hidden}
+.hero svg{width:56px;height:56px;opacity:.95}
+.hero .ph{position:absolute;left:10px;bottom:10px;font-size:12px;background:rgba(0,0,0,.35);padding:4px 8px;border-radius:8px}
+.dname{font-family:var(--display);font-size:22px;font-weight:600;letter-spacing:-.015em;margin:0;text-wrap:balance}
+.notice{border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.45;background:var(--accent-soft);color:var(--ink)}
+.notice.blue{background:var(--surface-2)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:14px}
+.kv dt{color:var(--ink-3)}
+.kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.amen{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.am{display:flex;align-items:center;gap:8px;font-size:14px;padding:8px 10px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.am.no{color:var(--ink-3);text-decoration:line-through}
+.am.unk{color:var(--ink-3)}
+.rv{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface);display:flex;flex-direction:column;gap:6px}
+.rv .who{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--ink-3)}
+.rv p{margin:0;line-height:1.5}
+.rv .pics{display:flex;gap:6px}
+.rv .pics span{width:52px;height:52px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-3)}
+.bigrate{display:flex;align-items:center;gap:14px}
+.bigrate b{font-family:var(--display);font-size:34px;font-weight:600;font-variant-numeric:tabular-nums}
+.starpick{display:flex;gap:4px}
+.starpick button{border:0;background:transparent;font-size:28px;line-height:1;color:var(--line);padding:2px}
+.starpick button.on{color:var(--accent)}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500}
+.inp{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box}
+textarea.inp{min-height:90px;resize:vertical}
+.photo-drop{border:1.5px dashed var(--line);border-radius:12px;height:110px;display:grid;place-items:center;color:var(--ink-2);font-size:14px;background:var(--surface);text-align:center}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.45}
+.check input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent)}
+.steps{display:flex;gap:6px}
+.steps span{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.steps span.on{background:var(--accent)}
+.toast{position:absolute;z-index:999;left:50%;bottom:calc(110px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:.25s;max-width:calc(100% - 40px);text-align:center;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.q{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.q .row{display:flex;gap:8px;flex-wrap:wrap}
+.demo-ribbon{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--warn)}
+@media (min-width:900px){
+  .sheet{left:auto;right:16px;bottom:16px;width:400px;border-radius:20px;max-height:calc(100% - 140px)}
+  .sheet.min{transform:translateY(calc(100% - 92px))}
+  .panel{left:auto;width:460px;box-shadow:var(--shadow)}
+  .fab{right:432px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div id="app">
+  <div id="map" aria-label="Map"></div>
+
+  <div class="top">
+    <div class="bar">
+      <div class="brand"><span class="mk"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3c-3.9 0-7 3.1-7 7 0 5.2 7 11 7 11s7-5.8 7-11c0-3.9-3.1-7-7-7z" fill="#e0a14a"/><path d="M14.6 8.2a3.2 3.2 0 1 0 0 3.6 2.6 2.6 0 1 1 0-3.6z" fill="#16233b"/></svg></span><span class="bt">PrayerAid</span></div>
+      <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="q" type="search" autocomplete="off" data-ph="search"></label>
+      <button class="iconbtn" id="filterBtn" aria-label="Filters"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span class="badge" id="fcount" hidden>0</span></button>
+      <button class="lang" id="langBtn">عربي</button>
+    </div>
+    <div class="chips" id="kindChips"></div>
+  </div>
+
+  <div class="fab" id="fab">
+    <button class="iconbtn" id="locBtn" aria-label="My location"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+    <button class="addbtn" id="addBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg><span data-t="add"></span></button>
+  </div>
+
+  <div class="sheet min" id="sheet">
+    <button class="grab" id="grab" aria-label="Expand list"><span></span></button>
+    <div class="sheet-head">
+      <div><h2 id="countTitle"></h2><div class="sub" id="countSub"></div></div>
+      <select class="sortsel" id="sort" aria-label="Sort"></select>
+    </div>
+    <div class="locbanner" id="locBanner" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span id="locBannerText"></span><button class="btn sm primary" id="locGo" data-t="useLoc"></button></div>
+    <div class="sheet-body" id="list"></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="panel" id="pFilters" aria-hidden="true">
+    <div class="panel-head"><button class="back" data-close aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button><h2 data-t="filters"></h2><button class="btn sm" id="resetF" data-t="reset"></button></div>
+    <div class="panel-body" id="filterBody"></div>
+    <div class="panel-foot"><button class="btn dark" data-close id="applyF"></button></div>
+  </div>
+
+  <!-- Detail -->
+  <div class="panel" id="pDetail" aria-hidden="true">
+    <div class="panel-head"><button class="back" data-close aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button><h2 id="dTitle"></h2></div>
+    <div class="panel-body" id="detailBody"></div>
+  </div>
+
+  <!-- Suggest / business / review / admin share one panel -->
+  <div class="panel" id="pForm" aria-hidden="true">
+    <div class="panel-head"><button class="back" data-close aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button><h2 id="fTitle"></h2></div>
+    <div class="panel-body" id="formBody"></div>
+    <div class="panel-foot" id="formFoot"></div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const TILES = {};
+const OSM_MOSQUES = [{"id": "n2056803076", "lat": 49.59684, "lon": 6.13479, "name": "Le Juste Milieu", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n3030417250", "lat": 49.52259, "lon": 5.88644, "name": "Mosquée Afnane Differdange", "street": "Rue John F. Kennedy", "num": "41", "city": "Differdange", "pc": "4599", "web": null, "phone": null, "oh": null}, {"id": "n3192161724", "lat": 49.23024, "lon": 7.00823, "name": "Bosnisches Islamisches Kulturzentrum Saarbrücken", "street": "Arndtstraße", "num": "14-16", "city": "Saarbrücken", "pc": "66121", "web": null, "phone": null, "oh": null}, {"id": "n4510245146", "lat": 49.76571, "lon": 6.64786, "name": "Imam Husain Verein e.V.", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n5173721726", "lat": 49.23517, "lon": 6.97606, "name": "Moschee der DITIB Merkez Camii Saarbrücken", "street": "Goebenstraße", "num": "38", "city": "Saarbrücken", "pc": "66117", "web": "https://www.ditib-saarbruecken.de/", "phone": "+49 681 9273298", "oh": null}, {"id": "n5173736904", "lat": 49.24499, "lon": 6.97034, "name": "Mesxhidul El-Iman", "street": "Lebacher Straße", "num": "66", "city": "Saarbrücken", "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n5670321474", "lat": 49.24485, "lon": 6.97042, "name": "Mesxhidul El-Iman", "street": "Lebacher Straße", "num": "66", "city": "Saarbrücken", "pc": "66113", "web": null, "phone": null, "oh": null}, {"id": "n7442489921", "lat": 49.22574, "lon": 6.01595, "name": "Association Salama", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n7837419495", "lat": 49.3528, "lon": 6.72843, "name": "Muslimische Gemeinde Saarlouis (MGS) e.V.", "street": "Marktstraße", "num": "15", "city": "Dillingen/Saar", "pc": "66763", "web": null, "phone": null, "oh": null}, {"id": "n10053033318", "lat": 49.68725, "lon": 5.79603, "name": "Mosquée d'Arlon", "street": null, "num": null, "city": null, "pc": "6700", "web": null, "phone": null, "oh": null}, {"id": "n10814575653", "lat": 49.12011, "lon": 6.21349, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n11028289797", "lat": 49.87138, "lon": 6.1589, "name": "Centre culturel islamique Nordstadt", "street": null, "num": null, "city": null, "pc": null, "web": "https://ccins.lu/", "phone": null, "oh": "Mo-Su 08:00-17:00"}, {"id": "n12758067486", "lat": 49.12021, "lon": 6.18326, "name": "Mosquée de la Paix", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n13046299948", "lat": 49.27399, "lon": 7.01469, "name": "Omar Ibn Al Khattab Moschee", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "n13964958535", "lat": 49.16983, "lon": 6.93976, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w88743210", "lat": 49.34626, "lon": 6.18497, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w88917682", "lat": 49.37062, "lon": 6.15174, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w90387543", "lat": 49.17396, "lon": 6.94116, "name": "Ar-Rahma", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w90390239", "lat": 49.17185, "lon": 6.93312, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w92869083", "lat": 49.2229, "lon": 7.02614, "name": "Bosnisches Kulturzentrum", "street": "Brebacher Landstraße", "num": "16", "city": "Saarbrücken", "pc": "66121", "web": null, "phone": null, "oh": null}, {"id": "w95455290", "lat": 49.1174, "lon": 6.86725, "name": "Mosquée El Hijra", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w99517433", "lat": 49.32876, "lon": 6.13478, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w103142185", "lat": 49.11838, "lon": 6.18912, "name": "Mosquée de Metz CIMG", "street": null, "num": null, "city": null, "pc": null, "web": "https://www.cimgmetz.org/", "phone": null, "oh": null}, {"id": "w111490293", "lat": 50.01171, "lon": 5.72743, "name": "Mosquée Al Imane", "street": "Avenue de l'Indépendance", "num": "100", "city": "Bastogne", "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w113717888", "lat": 49.75005, "lon": 6.62473, "name": "Islamisches Kulturzentrum Trier e.V.", "street": "Luxemburger Straße", "num": "23", "city": "Trier", "pc": "54294", "web": "https://www.islam-trier.de/", "phone": "+49 651 9988947", "oh": null}, {"id": "w119909953", "lat": 49.25112, "lon": 6.85691, "name": null, "street": "Moltkestraße", "num": "12a", "city": "Völklingen", "pc": "66333", "web": null, "phone": null, "oh": null}, {"id": "w141666476", "lat": 49.16587, "lon": 5.86908, "name": "Mosquée de Jarny", "street": "Avenue Jean Jaurès", "num": "42bis", "city": "Jarny", "pc": "54800", "web": null, "phone": null, "oh": null}, {"id": "w191725221", "lat": 49.23742, "lon": 6.9678, "name": "Bilal Moschee", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w206431381", "lat": 49.56985, "lon": 5.53173, "name": "Mosquée de Virton", "street": "Rue Albert Ier", "num": "3", "city": "Virton", "pc": "6760", "web": null, "phone": null, "oh": null}, {"id": "w220085845", "lat": 49.96857, "lon": 6.5242, "name": "Bitburger Moschee", "street": null, "num": null, "city": null, "pc": null, "web": "https://www.bitburger-moschee.de/", "phone": "+49 6561 6989188", "oh": null}, {"id": "w236316502", "lat": 49.24658, "lon": 6.83825, "name": "Selimiye Moschee", "street": "Schaffhauser Straße", "num": "8", "city": "Völklingen", "pc": "66333", "web": null, "phone": "+49 6898 21380", "oh": null}, {"id": "w247486611", "lat": 49.43987, "lon": 6.85757, "name": "Mevlana Camii", "street": "Zerrstraße", "num": "17", "city": "Schmelz", "pc": "66839", "web": null, "phone": null, "oh": null}, {"id": "w304074932", "lat": 49.249, "lon": 6.90464, "name": "IGMG Ulu Camii", "street": "Theodor-Körner-Straße", "num": "4", "city": "Völklingen", "pc": "66333", "web": null, "phone": null, "oh": null}, {"id": "w313786981", "lat": 49.97446, "lon": 6.94661, "name": "Hamd Moschee", "street": "Werkstraße", "num": "12", "city": "Wittlich", "pc": "54516", "web": "https://ahmadiyya.de/gebetsstaette/moscheen/wittlich-wengerohr/", "phone": null, "oh": null}, {"id": "w331802746", "lat": 49.70365, "lon": 6.57952, "name": "Haci Bayram Camii", "street": "Dammstraße", "num": "2", "city": "Konz", "pc": "54329", "web": null, "phone": null, "oh": null}, {"id": "w353811973", "lat": 49.35541, "lon": 6.72509, "name": "DITIB Türkisch-Islamische Gemeinde e. V.", "street": "Gathmannstraße", "num": "10", "city": "Dillingen/Saar", "pc": "66763", "web": null, "phone": null, "oh": null}, {"id": "w354134825", "lat": 49.32979, "lon": 6.74696, "name": "Alsahraa Versammlung e.V.", "street": "Thirionstraße", "num": "40", "city": "Saarlouis", "pc": "66740", "web": null, "phone": null, "oh": null}, {"id": "w362880077", "lat": 49.98319, "lon": 6.89136, "name": "DITIB Eyüp Sultan Camii", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w409039763", "lat": 49.70825, "lon": 6.5876, "name": "Albukhary Moschee", "street": "Brunostraße", "num": "93", "city": "Konz", "pc": "54329", "web": null, "phone": null, "oh": null}, {"id": "w512059915", "lat": 49.24608, "lon": 6.94387, "name": "Islamische Gemeinde Saarland", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w588778289", "lat": 49.17835, "lon": 6.47431, "name": "Mosquée de Boulay", "street": "Rue du Général de Rascas", "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w712453834", "lat": 49.52728, "lon": 5.78051, "name": null, "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}, {"id": "w797121568", "lat": 49.62429, "lon": 6.03756, "name": "Centre Culturel Islamique", "street": null, "num": null, "city": null, "pc": null, "web": "https://www.islam.lu/", "phone": null, "oh": null}, {"id": "w812678420", "lat": 49.13097, "lon": 6.76915, "name": "Mosquée Tabligh", "street": null, "num": null, "city": null, "pc": null, "web": null, "phone": null, "oh": null}];
+</script>
+<script>
+// ---------- i18n ----------
+const STR = {
+en:{search:"Search places or towns",add:"Add a place",all:"All",mosque:"Mosques",business:"Businesses",public:"Public places",
+ kMosque:"Mosque",kBusiness:"Business",kPublic:"Public place",
+ places:n=>`${n} place${n===1?"":"s"}`,inView:"Luxembourg & Greater Region",nearest:"Nearest",rating:"Best rated",recent:"Recently confirmed",
+ filters:"Filters",reset:"Reset",show:n=>`Show ${n} place${n===1?"":"s"}`,space:"Prayer space",men:"Men",women:"Women",both:"Both · separate spaces",mixed:"Mixed",
+ amenities:"Amenities",wudu:"Wudu (ablution)",mats:"Prayer mats",quiet:"Quiet room",qibla:"Qibla marked",openNow:"Open now",minRating:"Minimum rating",any:"Any",
+ confirmed:"Confirmed in the last 30 days",distance:"Distance",useLoc:"Use my location",locBanner:"See places near you",locating:"Finding your location…",locDenied:"Location is blocked. Allow it in your browser settings, or search a town: distances are measured from the map centre.",locUnavail:"Your location is not available right now. Distances are measured from the map centre.",fromYou:"Distances from you",fromCentre:"Distances from the map centre",youAreHere:"You are here",anyDist:"Any",btype:"Business type",ptype:"Public place type",
+ cafe:"Café",restaurant:"Restaurant",shop:"Shop",warehouse:"Warehouse / workplace",association:"Association",other:"Other",
+ park:"Park",hospital:"Hospital",station:"Station / airport",mall:"Shopping centre",university:"University",
+ example:"Example",osm:"OpenStreetMap",unreviewed:"Not reviewed yet",lastConf:d=>d===0?"Confirmed today":`Confirmed ${d} day${d===1?"":"s"} ago`,
+ noRes:"No place matches these filters.",clear:"Clear filters",
+ exNote:"Fictional example to show how listings work. Not a real place.",osmNote:"Imported from OpenStreetMap. Nobody has reviewed this mosque on PrayerAid yet: be the first.",
+ directions:"Directions",prayed:"I prayed here",prayedDone:"Thanks. Check-in recorded.",review:"Write a review",report:"Report a problem",
+ address:"Address",hours:"Opening hours",phone:"Phone",website:"Website",unknown:"Unknown",reviews:"Reviews",noReviews:"No reviews yet.",
+ ofReviews:n=>`${n} review${n===1?"":"s"}`,checkins:n=>`${n} check-in${n===1?"":"s"}`,claim:"Is this your business? Claim it",
+ suggestTitle:"Suggest a place",step:(a,b)=>`Step ${a} of ${b}`,next:"Next",prev:"Back",send:"Send for review",
+ placeKind:"What kind of place?",name:"Name",namePh:"e.g. Café near the station",loc:"Location",locPh:"Street, town",locHint:"Drop the pin on the map in the real app. Exact address is shown only after approval.",
+ photos:"Photos",photoHint:"Tap to add photos of the prayer space. No faces, no licence plates.",desc:"How to find it, what to know",descPh:"e.g. Ask at the counter, room on the first floor, shoes off.",
+ confirmBox:"I confirm this is a public or business place, the owner agrees, and praying there does not block access or disturb anyone.",
+ sent:"Sent. You will be notified when it is approved.",bizTitle:"List your business",bizIntro:"Free. Every listing is checked by hand before it appears on the map.",
+ bizContact:"Contact email",bizRole:"Your role",owner:"Owner",manager:"Manager",employee:"Employee",bizSent:"Application sent. We will contact you.",
+ reviewTitle:"Your review",reviewPh:"Was it clean, quiet, easy to find?",addPhotos:"Add photos",post:"Post review",posted:"Review posted (demo: only on this device).",
+ menu:"More",business:"Businesses",forBiz:"For businesses",admin:"Review queue (admin demo)",adminIntro:"Only you see this. Nothing goes on the map until you approve it.",
+ approve:"Approve",reject:"Reject",approved:"Approved and published.",rejected:"Rejected. The sender is told why.",
+ reportSent:"Report sent to the moderator.",
+ pending:"Pending",newPlace:"New place",newPhoto:"New photo",bizClaim:"Business claim",by:"by",
+ demoBanner:"Prototype · places shown are fictional examples. Mosques (optional layer) are real OpenStreetMap data"},
+ar:{search:"ابحث عن مكان أو مدينة",add:"أضف مكاناً",all:"الكل",mosque:"المساجد",business:"المحلات",public:"الأماكن العامة",
+ kMosque:"مسجد",kBusiness:"محل تجاري",kPublic:"مكان عام",
+ places:n=>`${n} ${n===1?"مكان":"أماكن"}`,inView:"لوكسمبورغ والمنطقة الكبرى",nearest:"الأقرب",rating:"الأعلى تقييماً",recent:"المؤكَّد مؤخراً",
+ filters:"الفلاتر",reset:"إعادة ضبط",show:n=>`عرض ${n} ${n===1?"مكان":"أماكن"}`,space:"مكان الصلاة",men:"رجال",women:"نساء",both:"الاثنان · أماكن منفصلة",
+ amenities:"المرافق",wudu:"مكان للوضوء",mats:"سجاد الصلاة",quiet:"غرفة هادئة",qibla:"اتجاه القبلة محدد",openNow:"مفتوح الآن",minRating:"أقل تقييم",any:"الكل",
+ confirmed:"مؤكَّد خلال آخر 30 يوماً",distance:"المسافة",useLoc:"استعمل موقعي",locBanner:"اعرض الأماكن القريبة منك",locating:"جارٍ تحديد موقعك…",locDenied:"الوصول إلى الموقع محظور. فعّله من إعدادات المتصفح، أو ابحث عن مدينة: المسافات تُحسب من وسط الخريطة.",locUnavail:"موقعك غير متاح حالياً. المسافات تُحسب من وسط الخريطة.",fromYou:"المسافات من موقعك",fromCentre:"المسافات من وسط الخريطة",youAreHere:"أنت هنا",anyDist:"أي مسافة",btype:"نوع المحل",ptype:"نوع المكان العام",
+ cafe:"مقهى",restaurant:"مطعم",shop:"متجر",warehouse:"مستودع / مكان عمل",association:"جمعية",other:"أخرى",
+ park:"حديقة",hospital:"مستشفى",station:"محطة / مطار",mall:"مركز تجاري",university:"جامعة",
+ example:"مثال",osm:"OpenStreetMap",unreviewed:"لم يُقيَّم بعد",lastConf:d=>d===0?"تم التأكيد اليوم":`تم التأكيد قبل ${d} ${d===1?"يوم":"أيام"}`,
+ noRes:"لا يوجد مكان يطابق هذه الفلاتر.",clear:"مسح الفلاتر",
+ exNote:"مثال وهمي لتوضيح طريقة عمل البطاقات. هذا المكان غير موجود.",osmNote:"مستورد من OpenStreetMap. لم يقيّم أحد هذا المسجد على PrayerAid بعد: كن الأول.",
+ directions:"الاتجاهات",prayed:"صلّيت هنا",prayedDone:"شكراً. تم تسجيل زيارتك.",review:"اكتب تقييماً",report:"الإبلاغ عن مشكلة",
+ address:"العنوان",hours:"أوقات الفتح",phone:"الهاتف",website:"الموقع",unknown:"غير معروف",reviews:"التقييمات",noReviews:"لا توجد تقييمات بعد.",
+ ofReviews:n=>`${n} ${n===1?"تقييم":"تقييمات"}`,checkins:n=>`${n} ${n===1?"زيارة":"زيارات"}`,claim:"هل هذا محلك؟ طالب به",
+ suggestTitle:"اقترح مكاناً",step:(a,b)=>`الخطوة ${a} من ${b}`,next:"التالي",prev:"رجوع",send:"إرسال للمراجعة",
+ placeKind:"ما نوع المكان؟",name:"الاسم",namePh:"مثلاً: مقهى قرب المحطة",loc:"الموقع",locPh:"الشارع، المدينة",locHint:"في التطبيق تضع الدبوس على الخريطة. العنوان الدقيق لا يظهر إلا بعد الموافقة.",
+ photos:"الصور",photoHint:"أضف صوراً لمكان الصلاة. بدون وجوه ولا لوحات سيارات.",desc:"كيف تجده، وما يجب معرفته",descPh:"مثلاً: اسأل عند الكونتوار، الغرفة في الطابق الأول، اخلع الحذاء.",
+ confirmBox:"أؤكد أن هذا مكان عام أو محل تجاري، وأن المسؤول موافق، وأن الصلاة فيه لا تعرقل المرور ولا تزعج أحداً.",
+ sent:"تم الإرسال. سنخبرك عند الموافقة.",bizTitle:"سجّل محلك",bizIntro:"مجاناً. كل بطاقة تُراجع يدوياً قبل ظهورها على الخريطة.",
+ bizContact:"البريد الإلكتروني للتواصل",bizRole:"صفتك",owner:"المالك",manager:"المسيّر",employee:"موظف",bizSent:"تم إرسال الطلب. سنتواصل معك.",
+ reviewTitle:"تقييمك",reviewPh:"هل كان نظيفاً، هادئاً، سهل الإيجاد؟",addPhotos:"أضف صوراً",post:"نشر التقييم",posted:"تم نشر التقييم (نسخة تجريبية: على هذا الجهاز فقط).",
+ menu:"المزيد",forBiz:"لأصحاب المحلات",admin:"قائمة المراجعة (نسخة المسؤول التجريبية)",adminIntro:"أنت وحدك ترى هذا. لا شيء يظهر على الخريطة بدون موافقتك.",
+ approve:"قبول",reject:"رفض",approved:"تم القبول والنشر.",rejected:"تم الرفض. يتم إخبار المرسل بالسبب.",
+ reportSent:"تم إرسال البلاغ إلى المشرف.",
+ pending:"قيد المراجعة",newPlace:"مكان جديد",newPhoto:"صورة جديدة",bizClaim:"مطالبة بمحل",by:"من",
+ demoBanner:"نسخة تجريبية · الأماكن المعروضة أمثلة وهمية. المساجد (طبقة اختيارية) بيانات حقيقية من OpenStreetMap"}};
+let lang="en"; try{lang=localStorage.getItem("pa_lang")||"en";if(!STR[lang])lang="en"}catch(e){}
+const T=(k,...a)=>{const v=STR[lang][k];return typeof v==="function"?v(...a):(v??k)};
+
+// ---------- data ----------
+const AM=["wudu","mats","quiet","qibla"];
+const today=Date.now(), DAY=864e5;
+const EX=[ // fictional examples
+ {id:"e1",kind:"business",type:"cafe",name:"Café Nour",lat:49.6005,lon:6.1340,city:"Luxembourg-Gare",street:"(example) rue de Strasbourg",space:"both",am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Sa 07:00-20:00",open:[7,20],rating:4.8,rc:23,ci:61,conf:1,
+  revs:[{n:"Yassine",s:5,d:3,t:{en:"Small room behind the counter, very clean. Owner brings a mat if you ask.",ar:"غرفة صغيرة خلف الكونتوار، نظيفة جداً. صاحب المقهى يجيب سجادة إذا طلبت."},p:2},{n:"Amina",s:5,d:9,t:{en:"Separate corner for sisters upstairs. Quiet in the afternoon.",ar:"ركن منفصل للأخوات في الطابق العلوي. هادئ بعد الظهر."},p:1}]},
+ {id:"e2",kind:"business",type:"restaurant",name:"Le Petit Atlas",lat:49.6118,lon:6.1265,city:"Luxembourg-Ville",street:"(example) Grand-Rue",space:"men",am:{wudu:true,mats:true,quiet:false,qibla:true},hours:"Tu-Su 11:30-23:00",open:[11.5,23],rating:4.3,rc:11,ci:28,conf:6,
+  revs:[{n:"Karim",s:4,d:6,t:{en:"Prayer area in the basement storage room. Fine for Dhuhr, busy at night.",ar:"مكان للصلاة في الطابق السفلي. مناسب للظهر، مزدحم في الليل."},p:0}]},
+ {id:"e3",kind:"business",type:"warehouse",name:"Atelier Logistique Kayl",lat:49.4870,lon:6.0410,city:"Kayl",street:"(example) zone industrielle",space:"both",am:{wudu:true,mats:true,quiet:true,qibla:false},hours:"Mo-Fr 06:00-18:00",open:[6,18],rating:4.6,rc:7,ci:40,conf:2,
+  revs:[{n:"Bilal",s:5,d:2,t:{en:"They opened their break room to drivers passing by. Ring at gate B.",ar:"يفتحون غرفة الاستراحة للسائقين المارين. اضغط الجرس عند البوابة B."},p:1}]},
+ {id:"e4",kind:"business",type:"shop",name:"Épicerie Al Baraka",lat:49.4975,lon:5.9805,city:"Esch-sur-Alzette",street:"(example) rue de l'Alzette",space:"men",am:{wudu:false,mats:true,quiet:false,qibla:true},hours:"Mo-Sa 08:00-21:00",open:[8,21],rating:3.9,rc:9,ci:15,conf:18,
+  revs:[{n:"Omar",s:4,d:18,t:{en:"Small space next to the stock room. No wudu, bring your own water.",ar:"مكان صغير بجانب المخزن. لا يوجد مكان للوضوء، أحضر الماء معك."},p:0}]},
+ {id:"e5",kind:"business",type:"association",name:"Maison des Cultures Strassen",lat:49.6200,lon:6.0730,city:"Strassen",street:"(example) route d'Arlon",space:"both",am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Su 09:00-22:00",open:[9,22],rating:4.9,rc:31,ci:120,conf:0,
+  revs:[{n:"Sara",s:5,d:1,t:{en:"Proper prayer room with separate entrance for women. Jumu'ah here too.",ar:"قاعة صلاة حقيقية بمدخل منفصل للنساء. وفيها صلاة الجمعة أيضاً."},p:3}]},
+ {id:"e6",kind:"business",type:"cafe",name:"Kirchberg Coffee Lab",lat:49.6290,lon:6.1600,city:"Kirchberg",street:"(example) avenue J.F. Kennedy",space:"both",am:{wudu:false,mats:true,quiet:true,qibla:false},hours:"Mo-Fr 07:30-18:00",open:[7.5,18],rating:4.1,rc:5,ci:9,conf:12,
+  revs:[{n:"Lina",s:4,d:12,t:{en:"They let you use the meeting room if it's free. Ask staff.",ar:"يسمحون باستعمال قاعة الاجتماعات إذا كانت فارغة. اسأل الموظفين."},p:0}]},
+ {id:"e7",kind:"public",type:"hospital",name:"Multi-faith room (example hospital)",lat:49.6175,lon:6.1050,city:"Luxembourg-Ville",street:"(example) ground floor, near main hall",space:"both",am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"24/7",open:[0,24],rating:4.7,rc:14,ci:52,conf:3,
+  revs:[{n:"Hamza",s:5,d:3,t:{en:"Open day and night, clean, signs from the main entrance.",ar:"مفتوح ليلاً ونهاراً، نظيف، وعليه لافتات من المدخل الرئيسي."},p:1}]},
+ {id:"e8",kind:"public",type:"station",name:"Quiet room (example airport)",lat:49.6265,lon:6.2110,city:"Findel",street:"(example) departures, level 1",space:"both",am:{wudu:false,mats:false,quiet:true,qibla:true},hours:"05:00-23:00",open:[5,23],rating:3.6,rc:8,ci:19,conf:25,
+  revs:[{n:"Ilyas",s:3,d:25,t:{en:"Quiet but no mats. Qibla sticker on the wall.",ar:"هادئ لكن بدون سجاد. ملصق القبلة على الحائط."},p:0}]},
+ {id:"e9",kind:"public",type:"park",name:"Park bench area (example park)",lat:49.6085,lon:6.1215,city:"Luxembourg-Ville",street:"(example) lawn behind the playground",space:"men",am:{wudu:false,mats:false,quiet:true,qibla:false},hours:"Sunrise-sunset",open:[7,19],rating:3.8,rc:4,ci:6,conf:40,revs:[]},
+ {id:"e10",kind:"public",type:"university",name:"Student quiet room (example campus)",lat:49.5050,lon:5.9470,city:"Esch-Belval",street:"(example) library, 2nd floor",space:"both",am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Fr 08:00-20:00",open:[8,20],rating:4.5,rc:12,ci:44,conf:4,
+  revs:[{n:"Nour",s:5,d:4,t:{en:"Students keep it tidy. Badge needed after 18:00.",ar:"الطلبة يحافظون على نظافته. تحتاج بطاقة بعد الساعة 18:00."},p:1}]},
+ {id:"e11",kind:"business",type:"restaurant",name:"Saveurs du Maghreb",lat:49.1195,lon:6.1760,city:"Metz",street:"(example) rue Serpenoise",space:"both",am:{wudu:true,mats:true,quiet:false,qibla:true},hours:"Mo-Su 12:00-23:00",open:[12,23],rating:4.4,rc:19,ci:33,conf:5,
+  revs:[{n:"Rachid",s:4,d:5,t:{en:"Room upstairs, separate for women. Owner very welcoming.",ar:"قاعة في الطابق العلوي، منفصلة للنساء. صاحب المطعم مرحّب جداً."},p:2}]},
+ {id:"e12",kind:"public",type:"mall",name:"Prayer corner (example shopping centre)",lat:49.6880,lon:5.8150,city:"Arlon",street:"(example) near the toilets, level 0",space:"men",am:{wudu:true,mats:false,quiet:false,qibla:true},hours:"Mo-Sa 09:00-20:00",open:[9,20],rating:3.2,rc:6,ci:8,conf:50,
+  revs:[{n:"Adam",s:3,d:50,t:{en:"Small and busy on Saturdays. Better to go early.",ar:"صغير ومزدحم يوم السبت. الأفضل الذهاب باكراً."},p:0}]},
+];
+EX.forEach(e=>{e.example=true;e.source="example"});
+const MOSQ=OSM_MOSQUES.map(m=>({id:m.id,kind:"mosque",type:"mosque",name:m.name,lat:m.lat,lon:m.lon,city:m.city,street:[m.street,m.num].filter(Boolean).join(" ")+(m.pc?`, ${m.pc}`:""),web:m.web,phone:m.phone,hours:m.oh,source:"osm",space:null,am:{},rating:0,rc:0,ci:0,conf:null,revs:[]}));
+let PLACES=[...EX,...MOSQ];
+const LUX=[49.6116,6.1319];
+function dist(a,b){const R=6371,dLa=(b[0]-a[0])*Math.PI/180,dLo=(b[1]-a[1])*Math.PI/180,x=Math.sin(dLa/2)**2+Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+let USER=null, USER_ACC=0;
+function origin(){if(USER)return USER;if(typeof map!=="undefined"){const c=map.getCenter();return [c.lat,c.lng]}return LUX}
+function isOpen(p){if(!p.open)return null;const d=new Date(),h=d.getHours()+d.getMinutes()/60;return h>=p.open[0]&&h<p.open[1]}
+const nameOf=p=>p.name||(lang==="ar"?"مسجد (بدون اسم على OSM)":"Mosque (unnamed on OSM)");
+
+// ---------- state ----------
+const F0={kind:"all",mosques:false,space:[],am:[],openNow:false,minR:0,conf:false,dist:0,btype:[],ptype:[]};
+let F=JSON.parse(JSON.stringify(F0)), sort="nearest", query="", selected=null;
+function activeCount(){return F.space.length+F.am.length+(F.openNow?1:0)+(F.minR?1:0)+(F.conf?1:0)+(F.dist?1:0)+F.btype.length+F.ptype.length}
+function filtered(){
+  const q=query.trim().toLowerCase();
+  const o=origin(); PLACES.forEach(p=>p.km=dist(o,[p.lat,p.lon]));
+  let r=PLACES.filter(p=>{
+    if(p.kind==="mosque"){if(!F.mosques)return false}else if(F.kind!=="all"&&p.kind!==F.kind)return false;
+    if(q&&!(`${nameOf(p)} ${p.city||""} ${p.street||""}`.toLowerCase().includes(q)))return false;
+    if(F.space.length&&!F.space.includes(p.space))return false;
+    if(F.am.length&&!F.am.every(a=>p.am[a]))return false;
+    if(F.openNow&&isOpen(p)!==true)return false;
+    if(F.minR&&p.rating<F.minR)return false;
+    if(F.conf&&!(p.conf!=null&&p.conf<=30))return false;
+    if(F.dist&&p.km>F.dist)return false;
+    if(F.btype.length&&p.kind==="business"&&!F.btype.includes(p.type))return false;
+    if(F.ptype.length&&p.kind==="public"&&!F.ptype.includes(p.type))return false;
+    return true});
+  if(sort==="nearest")r.sort((a,b)=>a.km-b.km);
+  if(sort==="rating")r.sort((a,b)=>b.rating-a.rating||b.rc-a.rc);
+  if(sort==="recent")r.sort((a,b)=>(a.conf??1e9)-(b.conf??1e9));
+  return r;
+}
+
+// ---------- icons ----------
+const GLY={mosque:'<path d="M12 3c1.6 1.4 4 2.6 4 5.2V10H8V8.2C8 5.6 10.4 4.4 12 3z"/><path d="M6 11h12v8H6z"/><path d="M11 15h2v4h-2z" fill="var(--g2)"/>',
+ business:'<path d="M5 9l1.5-4h11L19 9v1.2a2.3 2.3 0 0 1-4.6 0 2.3 2.3 0 0 1-4.6 0A2.3 2.3 0 0 1 5 10.2z"/><path d="M6.5 13h11v6h-11z"/>',
+ public:'<path d="M12 4l5 7h-3l4 5h-5v3h-2v-3H6l4-5H7z"/>'};
+const COL={mosque:"var(--mosque)",business:"var(--business)",public:"var(--public)"};
+const glyph=(k,c="#fff")=>`<svg viewBox="0 0 24 24" fill="${c}" style="--g2:${c==="#fff"?"rgba(0,0,0,.25)":"#fff"}">${GLY[k]}</svg>`;
+function pinHTML(p,sel){return `<div class="pin ${sel?"sel":""} ${p.source==="osm"?"unrev":""}"><svg viewBox="0 0 34 42"><path class="body" d="M17 41s14-13.2 14-24A14 14 0 0 0 3 17c0 10.8 14 24 14 24z" fill="${COL[p.kind]}" stroke="#fff" stroke-width="2"/><g transform="translate(7 6) scale(.84)" fill="#fff">${GLY[p.kind]}</g></svg></div>`}
+
+// ---------- map ----------
+const BLANK="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+const Local=L.TileLayer.extend({getTileUrl(c){const k=`${c.z}_${c.x}_${c.y}`;return TILES[k]?"data:image/jpeg;base64,"+TILES[k]:BLANK}});
+const EMBED=Object.keys(TILES).length>0, MAXZ=EMBED?13:19;
+const ATTR='© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
+const map=L.map("map",EMBED?{zoomControl:false,minZoom:7,maxZoom:13,maxBounds:[[48.6,4.9],[50.6,7.7]],maxBoundsViscosity:.8}:{zoomControl:false,minZoom:3,maxZoom:19}).setView([49.58,6.08],10);
+(EMBED?new Local("",{maxNativeZoom:13,minZoom:7,maxZoom:13,attribution:ATTR}):L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:ATTR})).addTo(map);
+map.attributionControl.setPrefix(false);
+const layer=L.layerGroup().addTo(map); const markers={};
+function drawMarkers(list){layer.clearLayers();list.forEach(p=>{const m=L.marker([p.lat,p.lon],{icon:L.divIcon({html:pinHTML(p,selected===p.id),className:"",iconSize:[34,42],iconAnchor:[17,41]}),title:nameOf(p),keyboard:true});m.on("click",()=>openDetail(p.id));m.addTo(layer);markers[p.id]=m})}
+
+// ---------- render ----------
+const $=s=>document.querySelector(s);
+function stars(r){const f=Math.round(r);return "★".repeat(f)+"☆".repeat(5-f)}
+function kindLabel(p){return p.kind==="mosque"?T("kMosque"):T(p.type)}
+function spaceLabel(s){return s?T(s):null}
+function cardHTML(p){
+  const tags=[];
+  if(p.example)tags.push(`<span class="tag ex">${T("example")}</span>`);
+  if(p.source==="osm")tags.push(`<span class="tag osm">${T("unreviewed")}</span>`);
+  if(p.space)tags.push(`<span class="tag">${spaceLabel(p.space)}</span>`);
+  if(p.conf!=null&&p.conf<=30)tags.push(`<span class="tag fresh">${T("lastConf",p.conf)}</span>`);
+  return `<button class="card" data-id="${p.id}"><span class="thumb" style="background:${COL[p.kind]}">${glyph(p.kind)}</span><span class="t"><span class="name">${esc(nameOf(p))}</span><span class="meta"><span>${kindLabel(p)}</span>·<span>${p.km.toFixed(1)} km</span>${p.rc?`·<span class="stars">${stars(p.rating)}</span><span>${p.rating.toFixed(1)} (${p.rc})</span>`:""}</span><span class="meta">${tags.join("")}</span></span></button>`}
+function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function render(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll("[data-t]").forEach(e=>e.textContent=T(e.dataset.t));
+  $("#q").placeholder=T("search"); $("#langBtn").textContent=lang==="en"?"عربي":"EN";document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  $("#kindChips").innerHTML=["all","business","public"].map(k=>`<button class="chip" data-kind="${k}" aria-pressed="${F.kind===k}">${k!=="all"?`<span class="dot" style="background:${COL[k]}"></span>`:""}${T(k)}</button>`).join("")+`<button class="chip" id="mosqChip" aria-pressed="${F.mosques}"><span class="dot" style="background:${COL.mosque}"></span>${T("mosque")}</button>`;
+  $("#sort").innerHTML=[["nearest",T("nearest")],["rating",T("rating")],["recent",T("recent")]].map(([v,l])=>`<option value="${v}" ${sort===v?"selected":""}>${l}</option>`).join("");
+  const n=activeCount(); $("#fcount").hidden=!n; $("#fcount").textContent=n;
+  const r=filtered(); $("#countTitle").textContent=T("places",r.length); $("#countSub").textContent=USER?T("fromYou"):T("fromCentre");if($("#locBannerText"))$("#locBannerText").textContent=T(typeof locMsg!=="undefined"?locMsg:"locBanner");
+  $("#list").innerHTML=`<div class="demo-ribbon">${T("demoBanner")}</div>`+(r.length?r.map(cardHTML).join(""):`<div class="empty">${T("noRes")}<br><br><button class="btn sm" id="clearF">${T("clear")}</button></div>`);
+  drawMarkers(r); renderFilters(); $("#applyF").textContent=T("show",r.length);
+}
+function optGroup(title,key,vals,multi=true){return `<section><h3>${title}</h3><div class="opts">${vals.map(([v,l])=>{const on=multi?F[key].includes(v):F[key]===v;return `<button class="opt" data-f="${key}" data-v="${v}" data-m="${multi}" aria-pressed="${on}">${l}</button>`}).join("")}</div></section>`}
+function renderFilters(){
+  $("#filterBody").innerHTML=
+   optGroup(T("space"),"space",[["men",T("men")],["women",T("women")],["both",T("both")]])+
+   optGroup(T("amenities"),"am",AM.map(a=>[a,T(a)]))+
+   `<section><h3>${T("openNow")}</h3><div class="opts"><button class="opt" data-f="openNow" data-v="1" data-m="bool" aria-pressed="${F.openNow}">${T("openNow")}</button><button class="opt" data-f="conf" data-v="1" data-m="bool" aria-pressed="${F.conf}">${T("confirmed")}</button></div></section>`+
+   optGroup(T("minRating"),"minR",[[0,T("any")],[3,"3+ ★"],[4,"4+ ★"],[4.5,"4.5+ ★"]],false)+
+   optGroup(T("distance"),"dist",[[0,T("anyDist")],[5,"5 km"],[10,"10 km"],[25,"25 km"],[50,"50 km"]],false)+
+   optGroup(T("btype"),"btype",["cafe","restaurant","shop","warehouse","association"].map(v=>[v,T(v)]))+
+   optGroup(T("ptype"),"ptype",["park","hospital","station","mall","university"].map(v=>[v,T(v)]));
+}
+
+// ---------- detail ----------
+let localRevs={}; let localCi={};
+function openDetail(id){
+  const p=PLACES.find(x=>x.id===id); if(!p)return; selected=id;
+  map.panTo([p.lat,p.lon]); drawMarkers(filtered());
+  $("#dTitle").textContent=nameOf(p);
+  const revs=[...(localRevs[id]||[]),...p.revs];
+  const ci=p.ci+(localCi[id]||0);
+  const amen=AM.map(a=>{const v=p.am[a];const cls=v===true?"":v===false?"no":"unk";return `<div class="am ${cls}">${v===true?"✓":v===false?"✕":"?"} ${T(a)}</div>`}).join("");
+  const gmaps=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}`;
+  $("#detailBody").innerHTML=`
+   <section><div class="hero" style="background:${COL[p.kind]}">${glyph(p.kind)}<span class="ph">${p.example?"📷 3":"📷 0"}</span></div></section>
+   <section>
+     <div class="meta">${p.example?`<span class="tag ex">${T("example")}</span>`:""}${p.source==="osm"?`<span class="tag osm">${T("osm")}</span>`:""}<span>${kindLabel(p)}</span>${p.city?`· <span>${esc(p.city)}</span>`:""}· <span>${p.km.toFixed(1)} km</span></div>
+     <h1 class="dname">${esc(nameOf(p))}</h1>
+     ${p.space?`<div class="meta"><span class="tag">${spaceLabel(p.space)}</span>${p.conf!=null?`<span class="tag fresh">${T("lastConf",p.conf)}</span>`:""}<span class="tag">${T("checkins",ci)}</span></div>`:""}
+     <div class="notice ${p.example?"":"blue"}">${p.example?T("exNote"):T("osmNote")}</div>
+   </section>
+   <section style="flex-direction:row;flex-wrap:wrap"><a class="btn primary" style="flex:1 1 160px" href="${gmaps}" target="_blank" rel="noopener">${T("directions")}</a><button class="btn dark" style="flex:1 1 160px" id="ciBtn">${T("prayed")}</button></section>
+   <section><h3>${T("amenities")}</h3><div class="amen">${amen}</div></section>
+   <section><dl class="kv"><dt>${T("address")}</dt><dd>${esc(p.street)||T("unknown")}${p.city?`, ${esc(p.city)}`:""}</dd><dt>${T("hours")}</dt><dd>${esc(p.hours)||T("unknown")}${isOpen(p)===true?` · <b style="color:var(--ok)">${T("openNow")}</b>`:""}</dd>${p.phone?`<dt>${T("phone")}</dt><dd>${esc(p.phone)}</dd>`:""}${p.web?`<dt>${T("website")}</dt><dd><a href="${esc(p.web)}" target="_blank" rel="noopener" style="color:var(--accent)">${esc(p.web)}</a></dd>`:""}</dl></section>
+   <section><h3>${T("reviews")}</h3>
+     ${p.rc||revs.length?`<div class="bigrate"><b>${(p.rating||revs[0]?.s||0).toFixed(1)}</b><div><div class="stars" style="font-size:18px">${stars(p.rating||revs[0]?.s||0)}</div><div class="sub" style="color:var(--ink-3);font-size:13px">${T("ofReviews",p.rc+(localRevs[id]?.length||0))}</div></div></div>`:`<div style="color:var(--ink-2)">${T("noReviews")}</div>`}
+     ${revs.map(r=>`<div class="rv"><div class="who"><b style="color:var(--ink)">${esc(r.n)}</b><span class="stars">${stars(r.s)}</span></div><p>${esc(typeof r.t==="string"?r.t:r.t[lang])}</p>${r.p?`<div class="pics">${"<span>📷</span>".repeat(r.p)}</div>`:""}</div>`).join("")}
+     <button class="btn" id="revBtn">${T("review")}</button>
+   </section>
+   <section style="flex-direction:row;flex-wrap:wrap;gap:8px">${p.kind!=="mosque"?`<button class="btn sm" id="claimBtn">${T("claim")}</button>`:""}<button class="btn sm" id="repBtn">${T("report")}</button></section>`;
+  $("#ciBtn").onclick=()=>{localCi[id]=(localCi[id]||0)+1;p.conf=0;toast(T("prayedDone"));openDetail(id);render()};
+  $("#revBtn").onclick=()=>openReview(p);
+  $("#repBtn").onclick=()=>toast(T("reportSent"));
+  if($("#claimBtn"))$("#claimBtn").onclick=()=>openBiz(p);
+  openPanel("#pDetail");
+}
+
+// ---------- forms ----------
+let sg={step:1,kind:"business",space:null,am:[]};
+function openSuggest(){sg={step:1,kind:"business",space:null,am:[],type:null};drawSuggest();$("#fTitle").textContent=T("suggestTitle");openPanel("#pForm")}
+function drawSuggest(){
+  const s=sg.step, N=3;
+  let body=`<section><div class="steps">${[1,2,3].map(i=>`<span class="${i<=s?"on":""}"></span>`).join("")}</div><div style="color:var(--ink-3);font-size:13px">${T("step",s,N)}</div></section>`;
+  if(s===1)body+=`<section><h3>${T("placeKind")}</h3><div class="opts">${["business","public"].map(k=>`<button class="opt" data-sk="${k}" aria-pressed="${sg.kind===k}"><span class="chip dot" style="padding:0;width:9px;height:9px;border:0;background:${COL[k]}"></span>${T(k==="business"?"kBusiness":"kPublic")}</button>`).join("")}</div>
+     <div class="opts">${(sg.kind==="business"?["cafe","restaurant","shop","warehouse","association","other"]:["park","hospital","station","mall","university","other"]).map(v=>`<button class="opt" data-st="${v}" aria-pressed="${sg.type===v}">${T(v)}</button>`).join("")}</div></section>
+     <section><label class="f" for="sgName">${T("name")}<input class="inp" id="sgName" placeholder="${T("namePh")}"></label><label class="f" for="sgLoc">${T("loc")}<input class="inp" id="sgLoc" placeholder="${T("locPh")}"></label><div style="color:var(--ink-3);font-size:13px">${T("locHint")}</div></section>`;
+  if(s===2)body+=`<section><h3>${T("space")}</h3><div class="opts">${["men","women","both"].map(v=>`<button class="opt" data-ss="${v}" aria-pressed="${sg.space===v}">${T(v)}</button>`).join("")}</div></section>
+     <section><h3>${T("amenities")}</h3><div class="opts">${AM.map(a=>`<button class="opt" data-sa="${a}" aria-pressed="${sg.am.includes(a)}">${T(a)}</button>`).join("")}</div></section>
+     <section><label class="f" for="sgHours">${T("hours")}<input class="inp" id="sgHours" placeholder="Mo-Fr 09:00-18:00"></label></section>`;
+  if(s===3)body+=`<section><h3>${T("photos")}</h3><label class="photo-drop" for="sgPhoto">${T("photoHint")}</label><input type="file" id="sgPhoto" accept="image/*" multiple hidden></section>
+     <section><label class="f" for="sgDesc">${T("desc")}<textarea class="inp" id="sgDesc" placeholder="${T("descPh")}"></textarea></label></section>
+     <section><label class="check" for="sgOk"><input type="checkbox" id="sgOk"><span>${T("confirmBox")}</span></label></section>`;
+  $("#formBody").innerHTML=body;
+  $("#formFoot").innerHTML=`${s>1?`<button class="btn" id="sgPrev">${T("prev")}</button>`:""}<button class="btn primary" id="sgNext" ${s===3?"disabled":""}>${s<3?T("next"):T("send")}</button>`;
+  if($("#sgPrev"))$("#sgPrev").onclick=()=>{sg.step--;drawSuggest()};
+  $("#sgNext").onclick=()=>{if(s<3){sg.step++;drawSuggest()}else{closePanels();toast(T("sent"))}};
+  if(s===3){const ok=$("#sgOk"),nx=$("#sgNext");ok.onchange=()=>{nx.disabled=!ok.checked;nx.style.opacity=ok.checked?1:.5};nx.style.opacity=.5;
+    $("#sgPhoto").onchange=e=>{const n=e.target.files.length;if(n)$(".photo-drop").textContent=`📷 ${n}`}}
+}
+function openBiz(p){
+  $("#fTitle").textContent=T("bizTitle");
+  $("#formBody").innerHTML=`<section><div class="notice">${T("bizIntro")}</div></section>
+   <section><label class="f" for="bzName">${T("name")}<input class="inp" id="bzName" value="${p?esc(p.name):""}" placeholder="${T("namePh")}"></label>
+   <h3>${T("btype")}</h3><div class="opts">${["cafe","restaurant","shop","warehouse","association","other"].map(v=>`<button class="opt" data-bt="${v}" aria-pressed="${p?.type===v}">${T(v)}</button>`).join("")}</div>
+   <label class="f" for="bzLoc">${T("loc")}<input class="inp" id="bzLoc" placeholder="${T("locPh")}"></label>
+   <label class="f" for="bzMail">${T("bizContact")}<input class="inp" id="bzMail" type="email" placeholder="contact@…"></label>
+   <h3>${T("bizRole")}</h3><div class="opts">${["owner","manager","employee"].map((v,i)=>`<button class="opt" data-br="${v}" aria-pressed="${i===0}">${T(v)}</button>`).join("")}</div></section>
+   <section><h3>${T("space")}</h3><div class="opts">${["men","women","both"].map(v=>`<button class="opt" data-bs="${v}" aria-pressed="false">${T(v)}</button>`).join("")}</div>
+   <h3>${T("photos")}</h3><label class="photo-drop" for="bzPhoto">${T("photoHint")}</label><input type="file" id="bzPhoto" accept="image/*" multiple hidden></section>`;
+  $("#formFoot").innerHTML=`<button class="btn primary" id="bzSend">${T("send")}</button>`;
+  $("#bzSend").onclick=()=>{closePanels();toast(T("bizSent"))};
+  openPanel("#pForm");
+}
+function openReview(p){
+  let st=0;
+  $("#fTitle").textContent=T("reviewTitle");
+  $("#formBody").innerHTML=`<section><div style="font-weight:600">${esc(nameOf(p))}</div><div class="starpick" id="sp">${[1,2,3,4,5].map(i=>`<button data-s="${i}" aria-label="${i}">★</button>`).join("")}</div>
+   <label class="f" for="rvText">${T("reviewTitle")}<textarea class="inp" id="rvText" placeholder="${T("reviewPh")}"></textarea></label>
+   <label class="photo-drop" for="rvPhoto">${T("addPhotos")}</label><input type="file" id="rvPhoto" accept="image/*" multiple hidden></section>`;
+  $("#formFoot").innerHTML=`<button class="btn primary" id="rvPost">${T("post")}</button>`;
+  $("#sp").onclick=e=>{const b=e.target.closest("button");if(!b)return;st=+b.dataset.s;[...$("#sp").children].forEach((x,i)=>x.classList.toggle("on",i<st))};
+  $("#rvPost").onclick=()=>{if(!st){$("#sp").animate([{transform:"translateX(-4px)"},{transform:"translateX(4px)"},{transform:"none"}],200);return}
+    (localRevs[p.id]=localRevs[p.id]||[]).unshift({n:lang==="ar"?"أنت":"You",s:st,d:0,t:$("#rvText").value||"—",p:$("#rvPhoto").files.length});
+    if(!p.rc){p.rating=st}p.conf=0;closePanels();toast(T("posted"));openDetail(p.id);render()};
+  openPanel("#pForm");
+}
+function openAdmin(){
+  $("#fTitle").textContent=T("admin");
+  const items=[[T("newPlace"),"Café Medina · Bonnevoie","Yassine"],[T("newPhoto"),"Café Nour","Amina"],[T("bizClaim"),"Le Petit Atlas","owner@…"],[T("newPlace"),"Prayer room · Howald","Karim"]];
+  $("#formBody").innerHTML=`<section><div class="notice blue">${T("adminIntro")}</div></section><section>${items.map((it,i)=>`<div class="q" id="qi${i}"><div class="meta"><span class="tag ex">${T("pending")}</span><span>${it[0]}</span></div><div style="font-weight:600">${esc(it[1])}</div><div style="color:var(--ink-3);font-size:13px">${T("by")} ${esc(it[2])}</div><div class="row"><button class="btn sm primary" data-ok="${i}">${T("approve")}</button><button class="btn sm" data-no="${i}">${T("reject")}</button></div></div>`).join("")}</section>`;
+  $("#formFoot").innerHTML="";
+  $("#formBody").onclick=e=>{const b=e.target.closest("[data-ok],[data-no]");if(!b)return;const i=b.dataset.ok??b.dataset.no;$("#qi"+i).remove();toast(b.dataset.ok!=null?T("approved"):T("rejected"))};
+  openPanel("#pForm");
+}
+
+// ---------- panels / toast ----------
+function openPanel(sel){document.querySelectorAll(".panel").forEach(p=>{const on=p.matches(sel);p.classList.toggle("open",on);p.setAttribute("aria-hidden",!on)})}
+function closePanels(){document.querySelectorAll(".panel").forEach(p=>{p.classList.remove("open");p.setAttribute("aria-hidden","true")});selected=null;drawMarkers(filtered())}
+let tt;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),2600)}
+
+// ---------- events ----------
+document.addEventListener("click",e=>{
+  const c=e.target.closest("[data-close]"); if(c){closePanels();return}
+  const k=e.target.closest("[data-kind]"); if(k){F.kind=k.dataset.kind;render();return}
+  const card=e.target.closest(".card"); if(card){openDetail(card.dataset.id);return}
+  const o=e.target.closest("#filterBody .opt"); if(o){const key=o.dataset.f,v=isNaN(+o.dataset.v)?o.dataset.v:+o.dataset.v;
+    if(o.dataset.m==="true"){F[key]=F[key].includes(v)?F[key].filter(x=>x!==v):[...F[key],v]} else if(o.dataset.m==="bool"){F[key]=!F[key]} else F[key]=v; render();return}
+  if(e.target.closest("#mosqChip")){F.mosques=!F.mosques;render();return}
+  if(e.target.closest("#clearF")){F=JSON.parse(JSON.stringify(F0));render();return}
+  const sk=e.target.closest("[data-sk]"); if(sk){sg.kind=sk.dataset.sk;sg.type=null;drawSuggest();return}
+  const stp=e.target.closest("[data-st]"); if(stp){sg.type=stp.dataset.st;drawSuggest();return}
+  const ss=e.target.closest("[data-ss]"); if(ss){sg.space=ss.dataset.ss;drawSuggest();return}
+  const sa=e.target.closest("[data-sa]"); if(sa){const a=sa.dataset.sa;sg.am=sg.am.includes(a)?sg.am.filter(x=>x!==a):[...sg.am,a];drawSuggest();return}
+  const single=e.target.closest("[data-bt],[data-br],[data-bs]"); if(single){const attr=["bt","br","bs"].find(a=>single.dataset[a]!=null);single.parentElement.querySelectorAll(`[data-${attr}]`).forEach(b=>b.setAttribute("aria-pressed",b===single));return}
+});
+$("#resetF").onclick=()=>{F=JSON.parse(JSON.stringify(F0));render()};
+$("#filterBtn").onclick=()=>openPanel("#pFilters");
+$("#q").oninput=e=>{query=e.target.value;render()};
+$("#sort").onchange=e=>{sort=e.target.value;render()};
+$("#grab").onclick=()=>$("#sheet").classList.toggle("min");
+$("#countTitle").onclick=()=>$("#sheet").classList.toggle("min");
+$("#langBtn").onclick=()=>{lang=lang==="en"?"ar":"en";try{localStorage.setItem("pa_lang",lang)}catch(e){};render();if(selected&&$("#pDetail").classList.contains("open"))openDetail(selected)};
+// ---------- real location ----------
+var locMsg="locBanner"; let youMarker=null, accCircle=null, watchId=null, locBusy=false;
+function showYou(){const ll=L.latLng(USER[0],USER[1]);
+  if(!youMarker){accCircle=L.circle(ll,{radius:USER_ACC,color:"#2f6fdf",weight:1,fillColor:"#2f6fdf",fillOpacity:.12,interactive:false}).addTo(map);
+    youMarker=L.circleMarker(ll,{radius:8,color:"#fff",weight:3,fillColor:"#2f6fdf",fillOpacity:1}).addTo(map).bindTooltip(T("youAreHere"))}
+  else{youMarker.setLatLng(ll);accCircle.setLatLng(ll).setRadius(USER_ACC)}}
+function onPos(pos,first){USER=[pos.coords.latitude,pos.coords.longitude];USER_ACC=pos.coords.accuracy||0;showYou();
+  if(first)map.setView(USER,13);$("#locBanner").hidden=true;render()}
+function onPosErr(err){locBusy=false;$("#locBtn").classList.remove("busy");
+  if(USER)return; // keep last known position
+  locMsg=err&&err.code===1?"locDenied":"locUnavail";$("#locBanner").hidden=false;$("#locBannerText").textContent=T(locMsg);$("#locGo").hidden=err&&err.code===1;render()}
+function locate(){
+  if(!("geolocation" in navigator)){onPosErr({code:2});return}
+  if(USER){map.setView(USER,Math.max(map.getZoom(),14));}
+  if(locBusy)return; locBusy=true; $("#locBtn").classList.add("busy"); if(!USER)toast(T("locating"));
+  navigator.geolocation.getCurrentPosition(pos=>{locBusy=false;$("#locBtn").classList.remove("busy");const first=!USER;onPos(pos,first);
+      if(watchId==null)watchId=navigator.geolocation.watchPosition(p=>onPos(p,false),()=>{}, {enableHighAccuracy:true,maximumAge:30000});},
+    onPosErr,{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+}
+$("#locBtn").onclick=locate;
+$("#locGo").onclick=locate;
+map.on("moveend",()=>{if(!USER)render()});
+// On load: if permission was already granted, locate silently; otherwise offer the button (the browser prompt appears on tap).
+(async()=>{try{if(navigator.permissions&&navigator.permissions.query){const st=await navigator.permissions.query({name:"geolocation"});
+   if(st.state==="granted"){locate();return} if(st.state==="denied"){onPosErr({code:1});return}}}catch(e){}
+  locMsg="locBanner";$("#locBanner").hidden=false;$("#locBannerText").textContent=T(locMsg);$("#locGo").hidden=false})();
+// Add button: long menu kept simple — first tap suggests a place; extra entry points below the list
+$("#addBtn").onclick=openSuggest;
+function placeFab(){const sh=$("#sheet");const min=sh.classList.contains("min");$("#fab").style.bottom=(window.innerWidth>=900?24:(min?104:Math.min(sh.offsetHeight+12,window.innerHeight*.5)))+"px"}
+new ResizeObserver(placeFab).observe($("#sheet"));$("#sheet").addEventListener("transitionend",placeFab);window.addEventListener("resize",placeFab);
+// extra links at end of list
+const _render=render; render=function(){_render();$("#list").insertAdjacentHTML("beforeend",`<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:6px"><button class="btn sm" id="bizLink">${T("forBiz")}</button><button class="btn sm" id="adminLink">${T("admin")}</button></div>`);$("#bizLink").onclick=()=>openBiz(null);$("#adminLink").onclick=openAdmin;placeFab()};
+render();
+</script>
+
+</body></html>
