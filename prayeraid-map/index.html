@@ -701,7 +701,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --mosque:#5fa6c9; --business:#e0a14a; --public:#86b86f;
   --ok:#5fbf86; --warn:#e0a14a; --bad:#e47a7a; --shadow:0 8px 28px rgba(0,0,0,.45); color-scheme:dark}
 [hidden]{display:none!important}
-html,body{height:100%}
+html,body{height:100%;overflow:hidden}
+#app{overflow:hidden}
 @media (max-width:520px){.brand{padding:6px}.brand .bt{display:none}}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;overflow:hidden}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -750,9 +751,10 @@ button{cursor:pointer}
 .addbtn{height:48px;border-radius:999px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:0 18px 0 14px;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow)}
 
 /* sheet */
-.sheet{position:absolute;z-index:600;left:0;right:0;bottom:0;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:0 -6px 30px rgba(22,35,59,.18);display:flex;flex-direction:column;max-height:86%;transition:transform .28s ease;padding-bottom:env(safe-area-inset-bottom,0px)}
-.sheet.min{transform:translateY(calc(100% - 92px - env(safe-area-inset-bottom,0px)))}
-.sheet .grab{width:100%;border:0;background:transparent;padding:10px 0 4px;display:grid;place-items:center}
+.sheet{position:absolute;z-index:600;left:0;right:0;bottom:0;height:86%;will-change:transform;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:0 -6px 30px rgba(22,35,59,.18);display:flex;flex-direction:column;max-height:86%;transition:transform .28s ease;padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet.dragging{transition:none}
+.sheet .grab,.sheet .sheet-head{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.sheet .grab{width:100%;border:0;background:transparent;padding:12px 0 8px;display:grid;place-items:center}
 .sheet .grab span{width:40px;height:4px;border-radius:2px;background:var(--line)}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
 .sheet-head h2{margin:0;font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:-.01em}
@@ -776,6 +778,23 @@ button{cursor:pointer}
 .locbanner svg{flex:none;color:#2f6fdf}
 #locBtn.busy{animation:pulse 1s infinite}
 @keyframes pulse{50%{opacity:.5}}
+.ownernote{border-radius:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.ownernote .on-h{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+[dir="rtl"] .ownernote .on-h{letter-spacing:0}
+.ownernote p{margin:0;line-height:1.5}
+#addForm{display:flex;flex-direction:column;gap:22px}
+#addForm>section{display:flex;flex-direction:column;gap:10px;max-width:640px;width:100%;margin-inline:auto}
+.opt{position:relative;cursor:pointer}
+.opt input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.opt:has(input:checked){background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.err{outline:2px solid var(--bad)!important;outline-offset:3px;border-radius:12px}
+.minimap{height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--line);direction:ltr}
+.locrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hint{color:var(--ink-3);font-size:13px;line-height:1.4}
+.subbox{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:12px;background:var(--surface-2)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+#afLoc.busy{animation:pulse 1s infinite}
 .empty{padding:24px 8px;text-align:center;color:var(--ink-2)}
 
 /* modal panels (detail, filters, forms) */
@@ -835,8 +854,8 @@ textarea.inp{min-height:90px;resize:vertical}
 .q .row{display:flex;gap:8px;flex-wrap:wrap}
 .demo-ribbon{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--warn)}
 @media (min-width:900px){
-  .sheet{left:auto;right:16px;bottom:16px;width:400px;border-radius:20px;max-height:calc(100% - 140px)}
-  .sheet.min{transform:translateY(calc(100% - 92px))}
+  .sheet{left:auto;right:16px;bottom:16px;width:400px;border-radius:20px;height:calc(100% - 140px);max-height:none}
+  
   .panel{left:auto;width:460px;box-shadow:var(--shadow)}
   .fab{right:432px}
 }
@@ -927,6 +946,7 @@ en:{search:"Search places or towns",add:"Add a place",all:"All",mosque:"Mosques"
  approve:"Approve",reject:"Reject",approved:"Approved and published.",rejected:"Rejected. The sender is told why.",
  reportSent:"Report sent to the moderator.",
  pending:"Pending",newPlace:"New place",newPhoto:"New photo",bizClaim:"Business claim",by:"by",
+ capN:n=>`Up to ${n} people`,capLabel:"Maximum number of people who can pray at the same time",ownerNote:"Note from the owner",ownerQ:"Are you the owner or manager of this place?",yes:"Yes",no:"No",ownerNoteLabel:"Note for visitors (shown as “Note from the owner”)",ownerNotePh:"e.g. Please use the side entrance after 18:00.",yourDetails:"Your contact details",yourDetailsHint:"Only the PrayerAid team sees this, to contact you about your submission.",yourName:"Your name",email:"Email",phoneOpt:"Phone (optional)",useMyLoc:"Use my location",pinHint:"Drag the pin or tap the map to mark the exact entrance.",addressLabel:"Address",sending:"Sending…",required:"Please fill in the highlighted fields.",photoMax:"Up to 4 photos, they are resized automatically.",addTitle:"Add a place",sentOk:"Sent. We check every place by hand and will reply by email.",locFill:"Address filled from your location. Check it.",amenitiesQ:"What is available?",typeQ:"Type",hoursPh:"e.g. Mo-Sa 08:00-20:00",photosAdded:n=>`${n} photo${n===1?"":"s"} added`,role:"Your role",
  demoBanner:"Prototype · places shown are fictional examples. Mosques (optional layer) are real OpenStreetMap data"},
 ar:{search:"ابحث عن مكان أو مدينة",add:"أضف مكاناً",all:"الكل",mosque:"المساجد",business:"المحلات",public:"الأماكن العامة",
  kMosque:"مسجد",kBusiness:"محل تجاري",kPublic:"مكان عام",
@@ -953,6 +973,7 @@ ar:{search:"ابحث عن مكان أو مدينة",add:"أضف مكاناً",al
  approve:"قبول",reject:"رفض",approved:"تم القبول والنشر.",rejected:"تم الرفض. يتم إخبار المرسل بالسبب.",
  reportSent:"تم إرسال البلاغ إلى المشرف.",
  pending:"قيد المراجعة",newPlace:"مكان جديد",newPhoto:"صورة جديدة",bizClaim:"مطالبة بمحل",by:"من",
+ capN:n=>`حتى ${n} أشخاص`,capLabel:"أقصى عدد من الأشخاص يمكنهم الصلاة في نفس الوقت",ownerNote:"ملاحظة من صاحب المكان",ownerQ:"هل أنت صاحب هذا المكان أو مسيّره؟",yes:"نعم",no:"لا",ownerNoteLabel:"ملاحظة للزوار (تظهر باسم «ملاحظة من صاحب المكان»)",ownerNotePh:"مثلاً: من فضلكم استعملوا المدخل الجانبي بعد الساعة 18:00.",yourDetails:"معلومات التواصل معك",yourDetailsHint:"فريق PrayerAid وحده يرى هذه المعلومات، للتواصل معك بخصوص طلبك.",yourName:"اسمك",email:"البريد الإلكتروني",phoneOpt:"الهاتف (اختياري)",useMyLoc:"استعمل موقعي",pinHint:"اسحب الدبوس أو اضغط على الخريطة لتحديد المدخل بالضبط.",addressLabel:"العنوان",sending:"جارٍ الإرسال…",required:"المرجو ملء الخانات المحددة.",photoMax:"حتى 4 صور، يتم تصغيرها تلقائياً.",addTitle:"أضف مكاناً",sentOk:"تم الإرسال. نراجع كل مكان يدوياً وسنرد عليك عبر البريد الإلكتروني.",locFill:"تم ملء العنوان من موقعك. تحقق منه.",amenitiesQ:"ما المتوفر؟",typeQ:"النوع",hoursPh:"مثلاً: الإثنين-السبت 08:00-20:00",photosAdded:n=>`تمت إضافة ${n} ${n===1?"صورة":"صور"}`,role:"صفتك",
  demoBanner:"نسخة تجريبية · الأماكن المعروضة أمثلة وهمية. المساجد (طبقة اختيارية) بيانات حقيقية من OpenStreetMap"}};
 let lang="en"; try{lang=localStorage.getItem("pa_lang")||"en";if(!STR[lang])lang="en"}catch(e){}
 const T=(k,...a)=>{const v=STR[lang][k];return typeof v==="function"?v(...a):(v??k)};
@@ -961,28 +982,28 @@ const T=(k,...a)=>{const v=STR[lang][k];return typeof v==="function"?v(...a):(v?
 const AM=["wudu","mats","quiet","qibla"];
 const today=Date.now(), DAY=864e5;
 const EX=[ // fictional examples
- {id:"e1",kind:"business",type:"cafe",name:"Café Nour",lat:49.6005,lon:6.1340,city:"Luxembourg-Gare",street:"(example) rue de Strasbourg",space:"both",am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Sa 07:00-20:00",open:[7,20],rating:4.8,rc:23,ci:61,conf:1,
+ {id:"e1",kind:"business",type:"cafe",name:"Café Nour",lat:49.6005,lon:6.1340,city:"Luxembourg-Gare",street:"(example) rue de Strasbourg",space:"both",cap:6,note:{en:"Please order something small if you can, the room is ours and we are happy to share it.",ar:"إذا استطعتم، اطلبوا شيئاً بسيطاً. الغرفة لنا ويسعدنا أن نشاركها معكم."},am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Sa 07:00-20:00",open:[7,20],rating:4.8,rc:23,ci:61,conf:1,
   revs:[{n:"Yassine",s:5,d:3,t:{en:"Small room behind the counter, very clean. Owner brings a mat if you ask.",ar:"غرفة صغيرة خلف الكونتوار، نظيفة جداً. صاحب المقهى يجيب سجادة إذا طلبت."},p:2},{n:"Amina",s:5,d:9,t:{en:"Separate corner for sisters upstairs. Quiet in the afternoon.",ar:"ركن منفصل للأخوات في الطابق العلوي. هادئ بعد الظهر."},p:1}]},
- {id:"e2",kind:"business",type:"restaurant",name:"Le Petit Atlas",lat:49.6118,lon:6.1265,city:"Luxembourg-Ville",street:"(example) Grand-Rue",space:"men",am:{wudu:true,mats:true,quiet:false,qibla:true},hours:"Tu-Su 11:30-23:00",open:[11.5,23],rating:4.3,rc:11,ci:28,conf:6,
+ {id:"e2",kind:"business",type:"restaurant",name:"Le Petit Atlas",lat:49.6118,lon:6.1265,city:"Luxembourg-Ville",street:"(example) Grand-Rue",space:"men",cap:4,am:{wudu:true,mats:true,quiet:false,qibla:true},hours:"Tu-Su 11:30-23:00",open:[11.5,23],rating:4.3,rc:11,ci:28,conf:6,
   revs:[{n:"Karim",s:4,d:6,t:{en:"Prayer area in the basement storage room. Fine for Dhuhr, busy at night.",ar:"مكان للصلاة في الطابق السفلي. مناسب للظهر، مزدحم في الليل."},p:0}]},
- {id:"e3",kind:"business",type:"warehouse",name:"Atelier Logistique Kayl",lat:49.4870,lon:6.0410,city:"Kayl",street:"(example) zone industrielle",space:"both",am:{wudu:true,mats:true,quiet:true,qibla:false},hours:"Mo-Fr 06:00-18:00",open:[6,18],rating:4.6,rc:7,ci:40,conf:2,
+ {id:"e3",kind:"business",type:"warehouse",name:"Atelier Logistique Kayl",lat:49.4870,lon:6.0410,city:"Kayl",street:"(example) zone industrielle",space:"both",cap:10,note:{en:"Drivers welcome Monday to Friday. Ring at gate B and say you are here to pray.",ar:"السائقون مرحب بهم من الإثنين إلى الجمعة. اضغط الجرس عند البوابة B وقل إنك جئت للصلاة."},am:{wudu:true,mats:true,quiet:true,qibla:false},hours:"Mo-Fr 06:00-18:00",open:[6,18],rating:4.6,rc:7,ci:40,conf:2,
   revs:[{n:"Bilal",s:5,d:2,t:{en:"They opened their break room to drivers passing by. Ring at gate B.",ar:"يفتحون غرفة الاستراحة للسائقين المارين. اضغط الجرس عند البوابة B."},p:1}]},
- {id:"e4",kind:"business",type:"shop",name:"Épicerie Al Baraka",lat:49.4975,lon:5.9805,city:"Esch-sur-Alzette",street:"(example) rue de l'Alzette",space:"men",am:{wudu:false,mats:true,quiet:false,qibla:true},hours:"Mo-Sa 08:00-21:00",open:[8,21],rating:3.9,rc:9,ci:15,conf:18,
+ {id:"e4",kind:"business",type:"shop",name:"Épicerie Al Baraka",lat:49.4975,lon:5.9805,city:"Esch-sur-Alzette",street:"(example) rue de l'Alzette",space:"men",cap:2,am:{wudu:false,mats:true,quiet:false,qibla:true},hours:"Mo-Sa 08:00-21:00",open:[8,21],rating:3.9,rc:9,ci:15,conf:18,
   revs:[{n:"Omar",s:4,d:18,t:{en:"Small space next to the stock room. No wudu, bring your own water.",ar:"مكان صغير بجانب المخزن. لا يوجد مكان للوضوء، أحضر الماء معك."},p:0}]},
- {id:"e5",kind:"business",type:"association",name:"Maison des Cultures Strassen",lat:49.6200,lon:6.0730,city:"Strassen",street:"(example) route d'Arlon",space:"both",am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Su 09:00-22:00",open:[9,22],rating:4.9,rc:31,ci:120,conf:0,
+ {id:"e5",kind:"business",type:"association",name:"Maison des Cultures Strassen",lat:49.6200,lon:6.0730,city:"Strassen",street:"(example) route d'Arlon",space:"both",cap:40,note:{en:"Jumu'ah at 13:15. Sisters' entrance is on the left side of the building.",ar:"صلاة الجمعة على الساعة 13:15. مدخل الأخوات على الجهة اليسرى من البناية."},am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Su 09:00-22:00",open:[9,22],rating:4.9,rc:31,ci:120,conf:0,
   revs:[{n:"Sara",s:5,d:1,t:{en:"Proper prayer room with separate entrance for women. Jumu'ah here too.",ar:"قاعة صلاة حقيقية بمدخل منفصل للنساء. وفيها صلاة الجمعة أيضاً."},p:3}]},
- {id:"e6",kind:"business",type:"cafe",name:"Kirchberg Coffee Lab",lat:49.6290,lon:6.1600,city:"Kirchberg",street:"(example) avenue J.F. Kennedy",space:"both",am:{wudu:false,mats:true,quiet:true,qibla:false},hours:"Mo-Fr 07:30-18:00",open:[7.5,18],rating:4.1,rc:5,ci:9,conf:12,
+ {id:"e6",kind:"business",type:"cafe",name:"Kirchberg Coffee Lab",lat:49.6290,lon:6.1600,city:"Kirchberg",street:"(example) avenue J.F. Kennedy",space:"both",cap:3,am:{wudu:false,mats:true,quiet:true,qibla:false},hours:"Mo-Fr 07:30-18:00",open:[7.5,18],rating:4.1,rc:5,ci:9,conf:12,
   revs:[{n:"Lina",s:4,d:12,t:{en:"They let you use the meeting room if it's free. Ask staff.",ar:"يسمحون باستعمال قاعة الاجتماعات إذا كانت فارغة. اسأل الموظفين."},p:0}]},
- {id:"e7",kind:"public",type:"hospital",name:"Multi-faith room (example hospital)",lat:49.6175,lon:6.1050,city:"Luxembourg-Ville",street:"(example) ground floor, near main hall",space:"both",am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"24/7",open:[0,24],rating:4.7,rc:14,ci:52,conf:3,
+ {id:"e7",kind:"public",type:"hospital",name:"Multi-faith room (example hospital)",lat:49.6175,lon:6.1050,city:"Luxembourg-Ville",street:"(example) ground floor, near main hall",space:"both",cap:12,am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"24/7",open:[0,24],rating:4.7,rc:14,ci:52,conf:3,
   revs:[{n:"Hamza",s:5,d:3,t:{en:"Open day and night, clean, signs from the main entrance.",ar:"مفتوح ليلاً ونهاراً، نظيف، وعليه لافتات من المدخل الرئيسي."},p:1}]},
- {id:"e8",kind:"public",type:"station",name:"Quiet room (example airport)",lat:49.6265,lon:6.2110,city:"Findel",street:"(example) departures, level 1",space:"both",am:{wudu:false,mats:false,quiet:true,qibla:true},hours:"05:00-23:00",open:[5,23],rating:3.6,rc:8,ci:19,conf:25,
+ {id:"e8",kind:"public",type:"station",name:"Quiet room (example airport)",lat:49.6265,lon:6.2110,city:"Findel",street:"(example) departures, level 1",space:"both",cap:5,am:{wudu:false,mats:false,quiet:true,qibla:true},hours:"05:00-23:00",open:[5,23],rating:3.6,rc:8,ci:19,conf:25,
   revs:[{n:"Ilyas",s:3,d:25,t:{en:"Quiet but no mats. Qibla sticker on the wall.",ar:"هادئ لكن بدون سجاد. ملصق القبلة على الحائط."},p:0}]},
- {id:"e9",kind:"public",type:"park",name:"Park bench area (example park)",lat:49.6085,lon:6.1215,city:"Luxembourg-Ville",street:"(example) lawn behind the playground",space:"men",am:{wudu:false,mats:false,quiet:true,qibla:false},hours:"Sunrise-sunset",open:[7,19],rating:3.8,rc:4,ci:6,conf:40,revs:[]},
- {id:"e10",kind:"public",type:"university",name:"Student quiet room (example campus)",lat:49.5050,lon:5.9470,city:"Esch-Belval",street:"(example) library, 2nd floor",space:"both",am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Fr 08:00-20:00",open:[8,20],rating:4.5,rc:12,ci:44,conf:4,
+ {id:"e9",kind:"public",type:"park",name:"Park bench area (example park)",lat:49.6085,lon:6.1215,city:"Luxembourg-Ville",street:"(example) lawn behind the playground",space:"men",cap:8,am:{wudu:false,mats:false,quiet:true,qibla:false},hours:"Sunrise-sunset",open:[7,19],rating:3.8,rc:4,ci:6,conf:40,revs:[]},
+ {id:"e10",kind:"public",type:"university",name:"Student quiet room (example campus)",lat:49.5050,lon:5.9470,city:"Esch-Belval",street:"(example) library, 2nd floor",space:"both",cap:15,am:{wudu:true,mats:true,quiet:true,qibla:true},hours:"Mo-Fr 08:00-20:00",open:[8,20],rating:4.5,rc:12,ci:44,conf:4,
   revs:[{n:"Nour",s:5,d:4,t:{en:"Students keep it tidy. Badge needed after 18:00.",ar:"الطلبة يحافظون على نظافته. تحتاج بطاقة بعد الساعة 18:00."},p:1}]},
- {id:"e11",kind:"business",type:"restaurant",name:"Saveurs du Maghreb",lat:49.1195,lon:6.1760,city:"Metz",street:"(example) rue Serpenoise",space:"both",am:{wudu:true,mats:true,quiet:false,qibla:true},hours:"Mo-Su 12:00-23:00",open:[12,23],rating:4.4,rc:19,ci:33,conf:5,
+ {id:"e11",kind:"business",type:"restaurant",name:"Saveurs du Maghreb",lat:49.1195,lon:6.1760,city:"Metz",street:"(example) rue Serpenoise",space:"both",cap:6,note:{en:"Prayer room upstairs is open during opening hours. Ask any staff member.",ar:"قاعة الصلاة في الطابق العلوي مفتوحة خلال أوقات العمل. اسأل أي موظف."},am:{wudu:true,mats:true,quiet:false,qibla:true},hours:"Mo-Su 12:00-23:00",open:[12,23],rating:4.4,rc:19,ci:33,conf:5,
   revs:[{n:"Rachid",s:4,d:5,t:{en:"Room upstairs, separate for women. Owner very welcoming.",ar:"قاعة في الطابق العلوي، منفصلة للنساء. صاحب المطعم مرحّب جداً."},p:2}]},
- {id:"e12",kind:"public",type:"mall",name:"Prayer corner (example shopping centre)",lat:49.6880,lon:5.8150,city:"Arlon",street:"(example) near the toilets, level 0",space:"men",am:{wudu:true,mats:false,quiet:false,qibla:true},hours:"Mo-Sa 09:00-20:00",open:[9,20],rating:3.2,rc:6,ci:8,conf:50,
+ {id:"e12",kind:"public",type:"mall",name:"Prayer corner (example shopping centre)",lat:49.6880,lon:5.8150,city:"Arlon",street:"(example) near the toilets, level 0",space:"men",cap:3,am:{wudu:true,mats:false,quiet:false,qibla:true},hours:"Mo-Sa 09:00-20:00",open:[9,20],rating:3.2,rc:6,ci:8,conf:50,
   revs:[{n:"Adam",s:3,d:50,t:{en:"Small and busy on Saturdays. Better to go early.",ar:"صغير ومزدحم يوم السبت. الأفضل الذهاب باكراً."},p:0}]},
 ];
 EX.forEach(e=>{e.example=true;e.source="example"});
@@ -1049,6 +1070,7 @@ function cardHTML(p){
   if(p.example)tags.push(`<span class="tag ex">${T("example")}</span>`);
   if(p.source==="osm")tags.push(`<span class="tag osm">${T("unreviewed")}</span>`);
   if(p.space)tags.push(`<span class="tag">${spaceLabel(p.space)}</span>`);
+  if(p.cap)tags.push(`<span class="tag">👥 ${T("capN",p.cap)}</span>`);
   if(p.conf!=null&&p.conf<=30)tags.push(`<span class="tag fresh">${T("lastConf",p.conf)}</span>`);
   return `<button class="card" data-id="${p.id}"><span class="thumb" style="background:${COL[p.kind]}">${glyph(p.kind)}</span><span class="t"><span class="name">${esc(nameOf(p))}</span><span class="meta"><span>${kindLabel(p)}</span>·<span>${p.km.toFixed(1)} km</span>${p.rc?`·<span class="stars">${stars(p.rating)}</span><span>${p.rating.toFixed(1)} (${p.rc})</span>`:""}</span><span class="meta">${tags.join("")}</span></span></button>`}
 function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
@@ -1090,7 +1112,8 @@ function openDetail(id){
    <section>
      <div class="meta">${p.example?`<span class="tag ex">${T("example")}</span>`:""}${p.source==="osm"?`<span class="tag osm">${T("osm")}</span>`:""}<span>${kindLabel(p)}</span>${p.city?`· <span>${esc(p.city)}</span>`:""}· <span>${p.km.toFixed(1)} km</span></div>
      <h1 class="dname">${esc(nameOf(p))}</h1>
-     ${p.space?`<div class="meta"><span class="tag">${spaceLabel(p.space)}</span>${p.conf!=null?`<span class="tag fresh">${T("lastConf",p.conf)}</span>`:""}<span class="tag">${T("checkins",ci)}</span></div>`:""}
+     ${p.space?`<div class="meta"><span class="tag">${spaceLabel(p.space)}</span>${p.cap?`<span class="tag">👥 ${T("capN",p.cap)}</span>`:""}${p.conf!=null?`<span class="tag fresh">${T("lastConf",p.conf)}</span>`:""}<span class="tag">${T("checkins",ci)}</span></div>`:""}
+     ${p.note?`<div class="ownernote"><div class="on-h">${T("ownerNote")}</div><p>${esc(p.note[lang]||p.note.en)}</p></div>`:""}
      <div class="notice ${p.example?"":"blue"}">${p.example?T("exNote"):T("osmNote")}</div>
    </section>
    <section style="flex-direction:row;flex-wrap:wrap"><a class="btn primary" style="flex:1 1 160px" href="${gmaps}" target="_blank" rel="noopener">${T("directions")}</a><button class="btn dark" style="flex:1 1 160px" id="ciBtn">${T("prayed")}</button></section>
@@ -1105,45 +1128,114 @@ function openDetail(id){
   $("#ciBtn").onclick=()=>{localCi[id]=(localCi[id]||0)+1;p.conf=0;toast(T("prayedDone"));openDetail(id);render()};
   $("#revBtn").onclick=()=>openReview(p);
   $("#repBtn").onclick=()=>toast(T("reportSent"));
-  if($("#claimBtn"))$("#claimBtn").onclick=()=>openBiz(p);
+  if($("#claimBtn"))$("#claimBtn").onclick=()=>openAddForm(p,true);
   openPanel("#pDetail");
 }
 
-// ---------- forms ----------
-let sg={step:1,kind:"business",space:null,am:[]};
-function openSuggest(){sg={step:1,kind:"business",space:null,am:[],type:null};drawSuggest();$("#fTitle").textContent=T("suggestTitle");openPanel("#pForm")}
-function drawSuggest(){
-  const s=sg.step, N=3;
-  let body=`<section><div class="steps">${[1,2,3].map(i=>`<span class="${i<=s?"on":""}"></span>`).join("")}</div><div style="color:var(--ink-3);font-size:13px">${T("step",s,N)}</div></section>`;
-  if(s===1)body+=`<section><h3>${T("placeKind")}</h3><div class="opts">${["business","public"].map(k=>`<button class="opt" data-sk="${k}" aria-pressed="${sg.kind===k}"><span class="chip dot" style="padding:0;width:9px;height:9px;border:0;background:${COL[k]}"></span>${T(k==="business"?"kBusiness":"kPublic")}</button>`).join("")}</div>
-     <div class="opts">${(sg.kind==="business"?["cafe","restaurant","shop","warehouse","association","other"]:["park","hospital","station","mall","university","other"]).map(v=>`<button class="opt" data-st="${v}" aria-pressed="${sg.type===v}">${T(v)}</button>`).join("")}</div></section>
-     <section><label class="f" for="sgName">${T("name")}<input class="inp" id="sgName" placeholder="${T("namePh")}"></label><label class="f" for="sgLoc">${T("loc")}<input class="inp" id="sgLoc" placeholder="${T("locPh")}"></label><div style="color:var(--ink-3);font-size:13px">${T("locHint")}</div></section>`;
-  if(s===2)body+=`<section><h3>${T("space")}</h3><div class="opts">${["men","women","both"].map(v=>`<button class="opt" data-ss="${v}" aria-pressed="${sg.space===v}">${T(v)}</button>`).join("")}</div></section>
-     <section><h3>${T("amenities")}</h3><div class="opts">${AM.map(a=>`<button class="opt" data-sa="${a}" aria-pressed="${sg.am.includes(a)}">${T(a)}</button>`).join("")}</div></section>
-     <section><label class="f" for="sgHours">${T("hours")}<input class="inp" id="sgHours" placeholder="Mo-Fr 09:00-18:00"></label></section>`;
-  if(s===3)body+=`<section><h3>${T("photos")}</h3><label class="photo-drop" for="sgPhoto">${T("photoHint")}</label><input type="file" id="sgPhoto" accept="image/*" multiple hidden></section>
-     <section><label class="f" for="sgDesc">${T("desc")}<textarea class="inp" id="sgDesc" placeholder="${T("descPh")}"></textarea></label></section>
-     <section><label class="check" for="sgOk"><input type="checkbox" id="sgOk"><span>${T("confirmBox")}</span></label></section>`;
-  $("#formBody").innerHTML=body;
-  $("#formFoot").innerHTML=`${s>1?`<button class="btn" id="sgPrev">${T("prev")}</button>`:""}<button class="btn primary" id="sgNext" ${s===3?"disabled":""}>${s<3?T("next"):T("send")}</button>`;
-  if($("#sgPrev"))$("#sgPrev").onclick=()=>{sg.step--;drawSuggest()};
-  $("#sgNext").onclick=()=>{if(s<3){sg.step++;drawSuggest()}else{closePanels();toast(T("sent"))}};
-  if(s===3){const ok=$("#sgOk"),nx=$("#sgNext");ok.onchange=()=>{nx.disabled=!ok.checked;nx.style.opacity=ok.checked?1:.5};nx.style.opacity=.5;
-    $("#sgPhoto").onchange=e=>{const n=e.target.files.length;if(n)$(".photo-drop").textContent=`📷 ${n}`}}
-}
-function openBiz(p){
-  $("#fTitle").textContent=T("bizTitle");
-  $("#formBody").innerHTML=`<section><div class="notice">${T("bizIntro")}</div></section>
-   <section><label class="f" for="bzName">${T("name")}<input class="inp" id="bzName" value="${p?esc(p.name):""}" placeholder="${T("namePh")}"></label>
-   <h3>${T("btype")}</h3><div class="opts">${["cafe","restaurant","shop","warehouse","association","other"].map(v=>`<button class="opt" data-bt="${v}" aria-pressed="${p?.type===v}">${T(v)}</button>`).join("")}</div>
-   <label class="f" for="bzLoc">${T("loc")}<input class="inp" id="bzLoc" placeholder="${T("locPh")}"></label>
-   <label class="f" for="bzMail">${T("bizContact")}<input class="inp" id="bzMail" type="email" placeholder="contact@…"></label>
-   <h3>${T("bizRole")}</h3><div class="opts">${["owner","manager","employee"].map((v,i)=>`<button class="opt" data-br="${v}" aria-pressed="${i===0}">${T(v)}</button>`).join("")}</div></section>
-   <section><h3>${T("space")}</h3><div class="opts">${["men","women","both"].map(v=>`<button class="opt" data-bs="${v}" aria-pressed="false">${T(v)}</button>`).join("")}</div>
-   <h3>${T("photos")}</h3><label class="photo-drop" for="bzPhoto">${T("photoHint")}</label><input type="file" id="bzPhoto" accept="image/*" multiple hidden></section>`;
-  $("#formFoot").innerHTML=`<button class="btn primary" id="bzSend">${T("send")}</button>`;
-  $("#bzSend").onclick=()=>{closePanels();toast(T("bizSent"))};
+// ---------- add-place form (submissions are emailed via FormSubmit) ----------
+const FORM_ACTION="https://formsubmit.co/oussama.ouabyt@gmail.com";
+let miniMap=null, miniPin=null, addrDirty=false;
+const radios=(name,vals,sel)=>`<div class="opts" data-group="${name}">${vals.map(([v,l])=>`<label class="opt"><input type="radio" name="${name}" value="${v}" ${sel===v?"checked":""}>${l}</label>`).join("")}</div>`;
+const TYPES=k=>k==="business"?["cafe","restaurant","shop","warehouse","association","other"]:["park","hospital","station","mall","university","other"];
+function openAddForm(p,owner){
+  $("#fTitle").textContent=T("addTitle");
+  $("#formBody").innerHTML=`<form id="addForm" action="${FORM_ACTION}" method="POST" enctype="multipart/form-data" novalidate>
+  <input type="hidden" name="_subject" value="PrayerAid: new place submitted">
+  <input type="hidden" name="_template" value="table">
+  <input type="hidden" name="_captcha" value="false">
+  <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <input type="hidden" name="_next" value="${location.origin+location.pathname}#sent">
+  <input type="hidden" name="app_language" value="${lang}">
+  <input type="hidden" name="latitude" id="afLat"><input type="hidden" name="longitude" id="afLon"><input type="hidden" name="map_link" id="afLink">
+  ${p?`<input type="hidden" name="existing_listing" value="${esc(nameOf(p))} (${p.id})">`:""}
+  <section><h3>${T("placeKind")}</h3>${radios("kind",[["business",T("kBusiness")],["public",T("kPublic")]],p?.kind==="public"?"public":"business")}<div id="afTypes"></div></section>
+  <section><label class="f" for="afName">${T("name")}<input class="inp" id="afName" name="place_name" value="${p?esc(p.name||""):""}" placeholder="${T("namePh")}"></label></section>
+  <section><h3>${T("loc")}</h3><div class="minimap" id="miniMap"></div>
+    <div class="locrow"><button type="button" class="btn sm dark" id="afLoc"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>${T("useMyLoc")}</button><span class="hint">${T("pinHint")}</span></div>
+    <label class="f" for="afAddr">${T("addressLabel")}<input class="inp" id="afAddr" name="address" placeholder="${T("locPh")}"></label></section>
+  <section><h3>${T("space")}</h3>${radios("space",[["men",T("men")],["women",T("women")],["both",T("both")]],p?.space)}
+    <label class="f" for="afCap">${T("capLabel")}<input class="inp" id="afCap" name="capacity" type="number" inputmode="numeric" min="1" max="2000" style="max-width:140px"></label></section>
+  <section><h3>${T("amenitiesQ")}</h3><div class="opts">${AM.map(a=>`<label class="opt"><input type="checkbox" name="has_${a}" value="yes">${T(a)}</label>`).join("")}</div>
+    <label class="f" for="afHours">${T("hours")}<input class="inp" id="afHours" name="opening_hours" placeholder="${T("hoursPh")}"></label></section>
+  <section><label class="f" for="afDesc">${T("desc")}<textarea class="inp" id="afDesc" name="description" maxlength="1000" placeholder="${T("descPh")}"></textarea></label></section>
+  <section><h3>${T("photos")}</h3><label class="photo-drop" for="afPhotos" id="afDrop">${T("photoHint")}</label><input type="file" id="afPhotos" name="attachment" accept="image/*" multiple hidden><div class="hint">${T("photoMax")}</div></section>
+  <section><h3>${T("ownerQ")}</h3>${radios("is_owner_or_manager",[["yes",T("yes")],["no",T("no")]],owner?"yes":"no")}
+    <div id="ownerBox" class="subbox"><h3>${T("role")}</h3>${radios("role",[["owner",T("owner")],["manager",T("manager")],["employee",T("employee")]],"owner")}
+    <label class="f" for="afNote">${T("ownerNoteLabel")}<textarea class="inp" id="afNote" name="owner_note" maxlength="300" placeholder="${T("ownerNotePh")}"></textarea></label></div></section>
+  <section><h3>${T("yourDetails")}</h3><div class="hint">${T("yourDetailsHint")}</div>
+    <label class="f" for="afYou">${T("yourName")}<input class="inp" id="afYou" name="name" autocomplete="name"></label>
+    <label class="f" for="afMail">${T("email")}<input class="inp" id="afMail" name="email" type="email" autocomplete="email" inputmode="email"></label>
+    <label class="f" for="afTel">${T("phoneOpt")}<input class="inp" id="afTel" name="phone" type="tel" autocomplete="tel"></label></section>
+  <section><label class="check" for="afOk"><input type="checkbox" id="afOk" name="confirmed_rules" value="yes"><span>${T("confirmBox")}</span></label></section>
+  </form>`;
+  $("#formFoot").innerHTML=`<button class="btn primary" type="submit" form="addForm" id="afSend">${T("send")}</button>`;
+  const f=$("#addForm");
+  const drawTypes=()=>{$("#afTypes").innerHTML=`<h3 style="margin-top:6px">${T("typeQ")}</h3>`+radios("type",TYPES(f.kind.value).map(v=>[v,T(v)]),p?.type)};
+  drawTypes(); f.addEventListener("change",e=>{if(e.target.name==="kind")drawTypes();if(e.target.name==="is_owner_or_manager")$("#ownerBox").hidden=f.is_owner_or_manager.value!=="yes";e.target.closest(".err")?.classList.remove("err")});
+  $("#ownerBox").hidden=!owner;
+  $("#afAddr").addEventListener("input",()=>{addrDirty=true});
+  addrDirty=false;
+  // mini map
   openPanel("#pForm");
+  setTimeout(()=>initMiniMap(p),320);
+  $("#afLoc").onclick=pinToMe;
+  $("#afPhotos").onchange=e=>shrinkPhotos(e.target);
+  f.addEventListener("submit",e=>{
+    const bad=[];
+    const need=(el,ok)=>{if(!ok){(el.closest(".opts")||el).classList.add("err");bad.push(el)}};
+    need(f.querySelector('[name="kind"]'),!!f.kind.value);
+    need($("#afName"),$("#afName").value.trim().length>1);
+    need($("#afAddr"),$("#afAddr").value.trim().length>3);
+    need(f.querySelector('[name="space"]'),!!f.space.value);
+    need($("#afCap"),+$("#afCap").value>0);
+    need($("#afYou"),$("#afYou").value.trim().length>1);
+    need($("#afMail"),/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($("#afMail").value.trim()));
+    need($("#afOk").closest(".check"),$("#afOk").checked);
+    if(bad.length){e.preventDefault();toast(T("required"));{const pb=$("#formBody"),el=bad[0].closest(".opts")||bad[0];pb.scrollTo({top:pb.scrollTop+el.getBoundingClientRect().top-pb.getBoundingClientRect().top-90,behavior:"smooth"})}return}
+    const b=$("#afSend");b.disabled=true;b.textContent=T("sending");
+  });
+}
+function setPin(lat,lon,fill){
+  $("#afLat").value=lat.toFixed(6);$("#afLon").value=lon.toFixed(6);
+  $("#afLink").value=`https://www.openstreetmap.org/?mlat=${lat.toFixed(6)}&mlon=${lon.toFixed(6)}#map=19/${lat.toFixed(6)}/${lon.toFixed(6)}`;
+  if(miniPin)miniPin.setLatLng([lat,lon]);
+  if(fill||!addrDirty)reverseGeocode(lat,lon,fill);
+}
+let rgTimer;
+function reverseGeocode(lat,lon,announce){clearTimeout(rgTimer);rgTimer=setTimeout(async()=>{
+  try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&lat=${lat}&lon=${lon}&accept-language=${lang==="ar"?"ar,en":"en"}`);
+    const j=await r.json();const a=j.address||{};
+    const line=[[a.house_number,a.road].filter(Boolean).join(" "),[a.postcode,a.city||a.town||a.village||a.suburb].filter(Boolean).join(" "),a.country].filter(Boolean).join(", ");
+    if(line&&(announce||!addrDirty)){$("#afAddr").value=line;addrDirty=false;$("#afAddr").classList.remove("err");if(announce)toast(T("locFill"))}
+  }catch(e){}},700)}
+function initMiniMap(p){
+  const el=$("#miniMap"); if(!el)return;
+  if(miniMap){miniMap.remove();miniMap=null}
+  const start=p?[p.lat,p.lon]:USER||[map.getCenter().lat,map.getCenter().lng];
+  miniMap=L.map(el,{zoomControl:true,attributionControl:false,maxZoom:MAXZ,minZoom:EMBED?7:3}).setView(start,p||USER?Math.min(MAXZ,17):Math.min(MAXZ,13));
+  (EMBED?new Local("",{maxNativeZoom:13,minZoom:7,maxZoom:13}):L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19})).addTo(miniMap);
+  miniPin=L.marker(start,{draggable:true,autoPan:true,icon:L.divIcon({html:'<div class="pin"><svg viewBox="0 0 34 42"><path d="M17 41s14-13.2 14-24A14 14 0 0 0 3 17c0 10.8 14 24 14 24z" fill="var(--accent)" stroke="#fff" stroke-width="2"/><circle cx="17" cy="16" r="5" fill="#fff"/></svg></div>',className:"",iconSize:[34,42],iconAnchor:[17,41]})}).addTo(miniMap);
+  miniPin.on("dragend",()=>{const ll=miniPin.getLatLng();setPin(ll.lat,ll.lng,false)});
+  miniMap.on("click",e=>setPin(e.latlng.lat,e.latlng.lng,false));
+  setPin(start[0],start[1],false);
+}
+function pinToMe(){
+  const go=(lat,lon)=>{miniMap&&miniMap.setView([lat,lon],Math.min(MAXZ,18));setPin(lat,lon,true)};
+  if(!("geolocation" in navigator)){toast(T("locUnavail"));return}
+  const b=$("#afLoc");b.classList.add("busy");
+  navigator.geolocation.getCurrentPosition(pos=>{b.classList.remove("busy");USER=[pos.coords.latitude,pos.coords.longitude];USER_ACC=pos.coords.accuracy||0;showYou();go(USER[0],USER[1])},
+    err=>{b.classList.remove("busy");toast(err.code===1?T("locDenied"):T("locUnavail"))},{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+}
+async function shrinkPhotos(input){
+  const files=[...input.files].slice(0,4); if(!files.length)return;
+  const dt=new DataTransfer();
+  for(const file of files){
+    try{const img=await createImageBitmap(file);const s=Math.min(1,1600/Math.max(img.width,img.height));
+      const c=document.createElement("canvas");c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.8));dt.items.add(new File([blob],file.name.replace(/\.\w+$/,"")+".jpg",{type:"image/jpeg"}));
+    }catch(e){if(file.size<2.4e6)dt.items.add(file)}
+  }
+  input.files=dt.files; $("#afDrop").textContent="📷 "+T("photosAdded",dt.files.length);
 }
 function openReview(p){
   let st=0;
@@ -1170,7 +1262,7 @@ function openAdmin(){
 // ---------- panels / toast ----------
 function openPanel(sel){document.querySelectorAll(".panel").forEach(p=>{const on=p.matches(sel);p.classList.toggle("open",on);p.setAttribute("aria-hidden",!on)})}
 function closePanels(){document.querySelectorAll(".panel").forEach(p=>{p.classList.remove("open");p.setAttribute("aria-hidden","true")});selected=null;drawMarkers(filtered())}
-let tt;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),2600)}
+let tt;function toast(m,ms=2600){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),ms)}
 
 // ---------- events ----------
 document.addEventListener("click",e=>{
@@ -1181,18 +1273,13 @@ document.addEventListener("click",e=>{
     if(o.dataset.m==="true"){F[key]=F[key].includes(v)?F[key].filter(x=>x!==v):[...F[key],v]} else if(o.dataset.m==="bool"){F[key]=!F[key]} else F[key]=v; render();return}
   if(e.target.closest("#mosqChip")){F.mosques=!F.mosques;render();return}
   if(e.target.closest("#clearF")){F=JSON.parse(JSON.stringify(F0));render();return}
-  const sk=e.target.closest("[data-sk]"); if(sk){sg.kind=sk.dataset.sk;sg.type=null;drawSuggest();return}
-  const stp=e.target.closest("[data-st]"); if(stp){sg.type=stp.dataset.st;drawSuggest();return}
-  const ss=e.target.closest("[data-ss]"); if(ss){sg.space=ss.dataset.ss;drawSuggest();return}
-  const sa=e.target.closest("[data-sa]"); if(sa){const a=sa.dataset.sa;sg.am=sg.am.includes(a)?sg.am.filter(x=>x!==a):[...sg.am,a];drawSuggest();return}
   const single=e.target.closest("[data-bt],[data-br],[data-bs]"); if(single){const attr=["bt","br","bs"].find(a=>single.dataset[a]!=null);single.parentElement.querySelectorAll(`[data-${attr}]`).forEach(b=>b.setAttribute("aria-pressed",b===single));return}
 });
 $("#resetF").onclick=()=>{F=JSON.parse(JSON.stringify(F0));render()};
 $("#filterBtn").onclick=()=>openPanel("#pFilters");
 $("#q").oninput=e=>{query=e.target.value;render()};
 $("#sort").onchange=e=>{sort=e.target.value;render()};
-$("#grab").onclick=()=>$("#sheet").classList.toggle("min");
-$("#countTitle").onclick=()=>$("#sheet").classList.toggle("min");
+
 $("#langBtn").onclick=()=>{lang=lang==="en"?"ar":"en";try{localStorage.setItem("pa_lang",lang)}catch(e){};render();if(selected&&$("#pDetail").classList.contains("open"))openDetail(selected)};
 // ---------- real location ----------
 var locMsg="locBanner"; let youMarker=null, accCircle=null, watchId=null, locBusy=false;
@@ -1221,12 +1308,34 @@ map.on("moveend",()=>{if(!USER)render()});
    if(st.state==="granted"){locate();return} if(st.state==="denied"){onPosErr({code:1});return}}}catch(e){}
   locMsg="locBanner";$("#locBanner").hidden=false;$("#locBannerText").textContent=T(locMsg);$("#locGo").hidden=false})();
 // Add button: long menu kept simple — first tap suggests a place; extra entry points below the list
-$("#addBtn").onclick=openSuggest;
-function placeFab(){const sh=$("#sheet");const min=sh.classList.contains("min");$("#fab").style.bottom=(window.innerWidth>=900?24:(min?104:Math.min(sh.offsetHeight+12,window.innerHeight*.5)))+"px"}
-new ResizeObserver(placeFab).observe($("#sheet"));$("#sheet").addEventListener("transitionend",placeFab);window.addEventListener("resize",placeFab);
+$("#addBtn").onclick=()=>openAddForm(null,false);
+// ---------- bottom sheet: drag with finger/mouse, 3 snap points ----------
+const sheet=$("#sheet"); let sheetState="min", sheetY=0;
+const PEEK=96;
+function snaps(){const H=sheet.offsetHeight,app=$("#app").clientHeight;return {full:0,half:Math.max(0,H-app*.52),min:Math.max(0,H-PEEK)}}
+function placeFab(){const fab=$("#fab");if(window.innerWidth>=900){fab.style.bottom="24px";fab.style.opacity=1;return}
+  const app=$("#app").getBoundingClientRect(),r=sheet.getBoundingClientRect();fab.style.bottom=(app.bottom-r.top+12)+"px";fab.style.opacity=r.top<app.top+app.height*.4?0:1;fab.style.pointerEvents=fab.style.opacity==="0"?"none":""}
+function setSheet(state,anim=true){sheetState=state;sheetY=snaps()[state];sheet.classList.toggle("dragging",!anim);sheet.style.transform=`translateY(${sheetY}px)`;sheet.classList.toggle("min",state==="min");if(!anim)placeFab()}
+sheet.addEventListener("transitionend",placeFab);
+let drag=null;
+sheet.addEventListener("pointerdown",e=>{const h=e.target.closest(".grab,.sheet-head");if(!h||e.target.closest("select,button:not(.grab)"))return;
+  drag={y0:e.clientY,s0:sheetY,t0:performance.now(),last:e.clientY,lt:performance.now(),v:0,moved:false,id:e.pointerId};sheet.setPointerCapture(e.pointerId);sheet.classList.add("dragging")});
+sheet.addEventListener("pointermove",e=>{if(!drag||e.pointerId!==drag.id)return;const dy=e.clientY-drag.y0;if(Math.abs(dy)>4)drag.moved=true;
+  const now=performance.now();drag.v=(e.clientY-drag.last)/Math.max(1,now-drag.lt);drag.last=e.clientY;drag.lt=now;
+  sheetY=Math.min(snaps().min,Math.max(0,drag.s0+dy));sheet.style.transform=`translateY(${sheetY}px)`;placeFab()});
+function endDrag(e){if(!drag||e.pointerId!==drag.id)return;sheet.classList.remove("dragging");const d=drag;drag=null;
+  if(!d.moved){setSheet(sheetState==="min"?"half":sheetState==="half"?"full":"min");return}
+  const s=snaps(),target=sheetY+d.v*220;let best="min",bd=1e9;for(const k in s){const dd=Math.abs(s[k]-target);if(dd<bd){bd=dd;best=k}}setSheet(best)}
+sheet.addEventListener("pointerup",endDrag);sheet.addEventListener("pointercancel",endDrag);
+window.addEventListener("resize",()=>setSheet(sheetState,false));
+// list scrolled to top + pull down => collapse
+let pull=null;$("#list").addEventListener("touchstart",e=>{pull=$("#list").scrollTop<=0?e.touches[0].clientY:null},{passive:true});
+$("#list").addEventListener("touchend",e=>{if(pull!=null&&e.changedTouches[0].clientY-pull>70)setSheet(sheetState==="full"?"half":"min");pull=null},{passive:true});
+if(location.hash==="#sent"){try{history.replaceState(null,"",location.pathname)}catch(e){}setTimeout(()=>toast(T("sentOk"),5000),700)}
 // extra links at end of list
-const _render=render; render=function(){_render();$("#list").insertAdjacentHTML("beforeend",`<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:6px"><button class="btn sm" id="bizLink">${T("forBiz")}</button><button class="btn sm" id="adminLink">${T("admin")}</button></div>`);$("#bizLink").onclick=()=>openBiz(null);$("#adminLink").onclick=openAdmin;placeFab()};
+const _render=render; render=function(){_render();$("#list").insertAdjacentHTML("beforeend",`<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:6px"><button class="btn sm" id="bizLink">${T("forBiz")}</button><button class="btn sm" id="adminLink">${T("admin")}</button></div>`);$("#bizLink").onclick=()=>openAddForm(null,true);$("#adminLink").onclick=openAdmin;placeFab()};
 render();
+setSheet("min",false);
 </script>
 
 </body></html>
